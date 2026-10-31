@@ -2,7 +2,7 @@
 const GROQ_ENDPOINT =
   "https://api.groq.com/openai/v1/chat/completions";
 
-const MODEL = "llama-3.3-70b-versatile";
+const MODEL = "openai/gpt-oss-120b";
 
 const sleep = (ms) =>
   new Promise((resolve) => setTimeout(resolve, ms));
@@ -13,27 +13,53 @@ module.exports = async function handler(req, res) {
       error: "Method not allowed.",
     });
   }
+const text = await response.text();
 
+let data;
+
+try {
+    data = JSON.parse(text);
+} catch (error) {
+    console.error("Server returned non-JSON:", text);
+    throw new Error("The server returned an invalid response. Check Vercel Runtime Logs.");
+}
+
+if (!response.ok) {
+    throw new Error(data.error || "Server error");
+}
   const apiKey = process.env.GROQ_API_KEY;
 
   if (!apiKey) {
     return res.status(500).json({
-      error: "GROQ_API_KEY is missing from Vercel Environment Variables.",
+      error: "GROQ_API_KEY is missing from Vercel.",
     });
   }
 
   try {
     const { messages, lessonContext } = req.body || {};
 
-    if (!Array.isArray(messages) || messages.length === 0) {
+    if (!Array.isArray(messages) || !messages.length) {
       return res.status(400).json({
         error: "Please send a message.",
       });
     }
 
-    if (messages.length > 30) {
+    const validMessages = messages
+      .filter(
+        (m) =>
+          m &&
+          ["user", "assistant"].includes(m.role) &&
+          typeof m.content === "string" &&
+          m.content.trim()
+      )
+      .map((m) => ({
+        role: m.role,
+        content: m.content.trim(),
+      }));
+
+    if (!validMessages.length) {
       return res.status(400).json({
-        error: "Conversation is too long.",
+        error: "No valid messages provided.",
       });
     }
 
@@ -42,45 +68,24 @@ module.exports = async function handler(req, res) {
 متخصص في مساعدة تلاميذ الصف السادس الابتدائي في مصر.
 
 قواعدك:
-
-1. أجب باللغة العربية الواضحة والمناسبة للمرحلة الابتدائية.
+1. أجب باللغة العربية الواضحة.
 2. اشرح خطوة بخطوة بطريقة سهلة.
 3. ساعد الطالب في النحو والإملاء والقراءة والتعبير.
 4. عند الإعراب اذكر الموقع الإعرابي والعلامة والسبب.
 5. وضح أنواع الخبر والمبتدأ عند الحاجة.
-6. استخدم أمثلة سهلة.
+6. استخدم أمثلة مناسبة للمرحلة الابتدائية.
 7. لا تخترع معلومات.
 8. كن مشجعًا وصبورًا ومحترمًا.
-9. اجعل إجاباتك منظمة.
-10. إذا طلب الطالب إجابة مباشرة، أجب مباشرة.
-11. إذا طلب شرحًا تفصيليًا، اشرح بالتفصيل.
-12. استخدم سياق المحادثة السابقة.
-13. اعتمد على الدرس المرفق عند الإجابة عن أسئلته.
+9. اجعل الإجابات منظمة.
+10. إذا طلب الطالب إجابة مباشرة فأجب مباشرة.
+11. استخدم سياق المحادثة السابقة.
+12. اعتمد على الدرس المرفق عند الإجابة عن أسئلته.
 
 معلومات الدرس الحالي:
 ${lessonContext
   ? JSON.stringify(lessonContext)
   : "لا يوجد درس محدد حاليًا."}
 `;
-
-    const validMessages = messages
-      .filter(
-        (message) =>
-          message &&
-          ["user", "assistant"].includes(message.role) &&
-          typeof message.content === "string" &&
-          message.content.trim().length > 0
-      )
-      .map((message) => ({
-        role: message.role === "assistant" ? "assistant" : "user",
-        content: message.content.trim(),
-      }));
-
-    if (!validMessages.length) {
-      return res.status(400).json({
-        error: "No valid messages.",
-      });
-    }
 
     const requestBody = {
       model: MODEL,
@@ -93,9 +98,8 @@ ${lessonContext
         ...validMessages,
       ],
 
-      temperature: 0.6,
-      max_tokens: 900,
-      top_p: 0.9,
+      max_completion_tokens: 900,
+      reasoning_effort: "low",
       stream: false,
     };
 
@@ -122,53 +126,72 @@ ${lessonContext
           signal: controller.signal,
         });
 
-        const result = await response.json();
+        const raw = await response.text();
 
-        if (response.ok) {
-          const reply =
-            result.choices?.[0]?.message?.content?.trim();
+        let result;
 
-          if (!reply) {
-            return res.status(502).json({
-              error: "Faseeh could not generate an answer.",
+        try {
+          result = JSON.parse(raw);
+        } catch {
+          result = {
+            error: {
+              message: "Groq returned an invalid response.",
+            },
+          };
+        }
+
+        if (!response.ok) {
+          const message =
+            result.error?.message || "Groq request failed.";
+
+          lastError = new Error(message);
+
+          const retryable = [429, 500, 502, 503, 504];
+
+          if (
+            !retryable.includes(response.status) ||
+            attempt === 2
+          ) {
+            console.error("GROQ ERROR:", {
+              status: response.status,
+              message,
+            });
+
+            return res.status(response.status).json({
+              error: message,
             });
           }
 
-          return res.status(200).json({ reply });
+          await sleep(1000);
+
+          continue;
         }
 
-        const errorMessage =
-          result.error?.message || "Groq request failed.";
+        const reply =
+          result.choices?.[0]?.message?.content?.trim();
 
-        lastError = new Error(errorMessage);
-
-        const retryable = [429, 500, 502, 503, 504];
-
-        if (!retryable.includes(response.status) || attempt === 2) {
-          console.error("Groq API error:", {
-            status: response.status,
-            message: errorMessage,
-          });
-
-          return res.status(response.status).json({
-            error: errorMessage,
+        if (!reply) {
+          return res.status(502).json({
+            error: "Groq returned an empty answer.",
           });
         }
 
-        await sleep(1000);
+        return res.status(200).json({
+          reply,
+        });
 
       } catch (error) {
         lastError = error;
 
         if (attempt === 2) {
-          console.error("Groq connection error:", error);
+          console.error("GROQ CONNECTION ERROR:", error);
 
           return res.status(
             error.name === "AbortError" ? 504 : 502
           ).json({
             error:
               error.name === "AbortError"
-                ? "Faseeh took too long to respond."
+                ? "Groq request timed out."
                 : "Could not connect to Groq.",
           });
         }
@@ -192,190 +215,3 @@ ${lessonContext
     });
   }
 };
-
-// ==========================================
-// FASEEH AI - GROQ FRONTEND CONNECTION
-// ==========================================
-
-const FASEEH_API = "/api/chat";
-
-// Conversation history
-let messages = [];
-
-// Current lesson context
-let lessonContext = null;
-
-// Prevent overlapping requests
-let isThinking = false;
-
-
-// ==========================================
-// SEND MESSAGE TO FASEEH
-// ==========================================
-
-async function sendToFaseeh(userMessage) {
-
-  if (isThinking) {
-    return null;
-  }
-
-  if (
-    typeof userMessage !== "string" ||
-    !userMessage.trim()
-  ) {
-    return null;
-  }
-
-  isThinking = true;
-
-  messages.push({
-    role: "user",
-    content: userMessage.trim(),
-  });
-
-  try {
-
-    const response = await fetch(FASEEH_API, {
-      method: "POST",
-
-      headers: {
-        "Content-Type": "application/json",
-      },
-
-      body: JSON.stringify({
-        messages,
-        lessonContext,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        data.error || "Faseeh could not respond."
-      );
-    }
-
-    if (!data.reply) {
-      throw new Error("Empty response from Faseeh.");
-    }
-
-    messages.push({
-      role: "assistant",
-      content: data.reply,
-    });
-
-    return data.reply;
-
-  } catch (error) {
-
-    console.error("FASEEH ERROR:", error);
-
-    // Remove unanswered message so it isn't
-    // accidentally duplicated in conversation history.
-    messages.pop();
-
-    throw error;
-
-  } finally {
-    isThinking = false;
-  }
-}
-
-
-// ==========================================
-// UPDATE LESSON CONTEXT
-// ==========================================
-
-function setFaseehLesson(lesson) {
-  lessonContext = lesson;
-}
-
-
-// ==========================================
-// CLEAR CHAT
-// ==========================================
-
-function clearFaseehChat() {
-  if (isThinking) return;
-
-  messages = [];
-}
-
-
-// ==========================================
-// GET CONVERSATION HISTORY
-// ==========================================
-
-function getFaseehMessages() {
-  return [...messages];
-}
-
-// ==========================================
-// SIMPLE FASEEH CHAT UI
-// ==========================================
-
-const chatInput = document.getElementById("chatInput");
-const sendButton = document.getElementById("sendButton");
-const chatMessages = document.getElementById("chatMessages");
-
-if (chatInput && sendButton && chatMessages) {
-
-  sendButton.addEventListener("click", handleSend);
-
-  chatInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
-      handleSend();
-    }
-  });
-
-  async function handleSend() {
-
-    const text = chatInput.value.trim();
-
-    if (!text || isThinking) return;
-
-    chatInput.value = "";
-
-    // Show user message
-    addMessage("user", text);
-
-    // Show loading message
-    const loading = addMessage("assistant", "فصيح يفكر...");
-
-    sendButton.disabled = true;
-
-    try {
-
-      const reply = await sendToFaseeh(text);
-
-      loading.textContent = reply;
-
-    } catch (error) {
-
-      loading.textContent =
-        "عذرًا، حدث خطأ أثناء الاتصال. حاول مرة أخرى.";
-
-      console.error(error);
-
-    } finally {
-      sendButton.disabled = false;
-    }
-  }
-
-  function addMessage(role, content) {
-
-    const message = document.createElement("div");
-
-    message.className = `message ${role}`;
-    message.textContent = content;
-
-    chatMessages.appendChild(message);
-
-    chatMessages.scrollTop =
-      chatMessages.scrollHeight;
-
-    return message;
-  }
-}
