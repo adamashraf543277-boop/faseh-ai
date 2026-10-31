@@ -1,47 +1,28 @@
 
+const GROQ_ENDPOINT =
+  "https://api.groq.com/openai/v1/chat/completions";
+
+const MODEL = "llama-3.3-70b-versatile";
+
 const sleep = (ms) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
-// ==========================================
-// FASEEH AI - GEMINI CONFIGURATION
-// ==========================================
-
-const GEMINI_MODEL = "gemini-3.8-flash";
-
-const GEMINI_ENDPOINT =
-  `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
-
-const MAX_ATTEMPTS = 2;
-const REQUEST_TIMEOUT = 18000;
-
-// ==========================================
-// VERCEL API HANDLER
-// ==========================================
-
 module.exports = async function handler(req, res) {
-
-  // Only accept POST requests
   if (req.method !== "POST") {
     return res.status(405).json({
       error: "Method not allowed.",
     });
   }
 
-  // Get API key
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
 
   if (!apiKey) {
     return res.status(500).json({
-      error: "GEMINI_API_KEY is missing from Vercel Environment Variables.",
+      error: "GROQ_API_KEY is missing from Vercel Environment Variables.",
     });
   }
 
   try {
-
-    // ==========================================
-    // 1. RECEIVE USER DATA
-    // ==========================================
-
     const { messages, lessonContext } = req.body || {};
 
     if (!Array.isArray(messages) || messages.length === 0) {
@@ -50,233 +31,123 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    // Prevent excessively large conversations
     if (messages.length > 30) {
       return res.status(400).json({
-        error: "Conversation is too long. Please start a new chat.",
+        error: "Conversation is too long.",
       });
     }
 
-    // ==========================================
-    // 2. FASEEH AI SYSTEM INSTRUCTIONS
-    // ==========================================
-
     const systemInstruction = `
-أنت فصيح AI، معلم لغة عربية ذكي ولطيف،
+أنت فصيح AI، معلم لغة عربية ذكي ولطيف
 متخصص في مساعدة تلاميذ الصف السادس الابتدائي في مصر.
 
-هدفك هو جعل اللغة العربية سهلة وممتعة ومفهومة.
-
-قواعدك الأساسية:
+قواعدك:
 
 1. أجب باللغة العربية الواضحة والمناسبة للمرحلة الابتدائية.
-
-2. اشرح المعلومات خطوة بخطوة بطريقة سهلة.
-
-3. ساعد الطالب في:
-   - النحو.
-   - الإملاء.
-   - القراءة.
-   - التعبير.
-   - النصوص.
-   - البلاغة.
-   - فهم الدروس.
-
-4. عند الإعراب:
-   - اذكر الكلمة.
-   - اذكر موقعها الإعرابي.
-   - اذكر علامة الإعراب.
-   - اشرح سبب الإعراب.
-   - وضح نوع الخبر إذا كان المطلوب.
-
-5. استخدم أمثلة بسيطة وواضحة.
-
-6. لا تخترع معلومات أو إجابات.
-
-7. إذا لم تكن متأكدًا، وضح ذلك للطالب.
-
+2. اشرح خطوة بخطوة بطريقة سهلة.
+3. ساعد الطالب في النحو والإملاء والقراءة والتعبير.
+4. عند الإعراب اذكر الموقع الإعرابي والعلامة والسبب.
+5. وضح أنواع الخبر والمبتدأ عند الحاجة.
+6. استخدم أمثلة سهلة.
+7. لا تخترع معلومات.
 8. كن مشجعًا وصبورًا ومحترمًا.
-
-9. لا تجعل الإجابات طويلة بلا داعٍ.
-
-10. لا تعطِ إجابة مختلفة عن المطلوب في السؤال.
-
-11. استخدم سياق المحادثة السابقة لفهم أسئلة الطالب.
-
-12. إذا أرسل الطالب سؤالًا من درس محدد،
-    اعتمد على محتوى الدرس المرفق.
-
-13. إذا طلب الطالب شرحًا تفصيليًا،
-    قدم شرحًا شاملًا ومنظمًا.
-
-14. إذا طلب إجابة مباشرة،
-    أعطه الإجابة مباشرة دون مقدمات طويلة.
+9. اجعل إجاباتك منظمة.
+10. إذا طلب الطالب إجابة مباشرة، أجب مباشرة.
+11. إذا طلب شرحًا تفصيليًا، اشرح بالتفصيل.
+12. استخدم سياق المحادثة السابقة.
+13. اعتمد على الدرس المرفق عند الإجابة عن أسئلته.
 
 معلومات الدرس الحالي:
-
 ${lessonContext
   ? JSON.stringify(lessonContext)
   : "لا يوجد درس محدد حاليًا."}
 `;
 
-    // ==========================================
-    // 3. CONVERT MESSAGES TO GEMINI FORMAT
-    // ==========================================
-
-    const contents = messages
-      .filter((message) =>
-        message &&
-        ["user", "assistant"].includes(message.role) &&
-        typeof message.content === "string" &&
-        message.content.trim().length > 0
+    const validMessages = messages
+      .filter(
+        (message) =>
+          message &&
+          ["user", "assistant"].includes(message.role) &&
+          typeof message.content === "string" &&
+          message.content.trim().length > 0
       )
       .map((message) => ({
-        role:
-          message.role === "assistant"
-            ? "model"
-            : "user",
-
-        parts: [
-          {
-            text: message.content.trim(),
-          },
-        ],
+        role: message.role === "assistant" ? "assistant" : "user",
+        content: message.content.trim(),
       }));
 
-    if (contents.length === 0) {
+    if (!validMessages.length) {
       return res.status(400).json({
-        error: "No valid messages were provided.",
+        error: "No valid messages.",
       });
     }
 
-    // ==========================================
-    // 4. GEMINI REQUEST CONFIGURATION
-    // ==========================================
-
     const requestBody = {
-      systemInstruction: {
-        parts: [
-          {
-            text: systemInstruction,
-          },
-        ],
-      },
+      model: MODEL,
 
-      contents,
+      messages: [
+        {
+          role: "system",
+          content: systemInstruction,
+        },
+        ...validMessages,
+      ],
 
-      generationConfig: {
-        temperature: 0.6,
-        maxOutputTokens: 700,
-        topP: 0.85,
-      },
+      temperature: 0.6,
+      max_tokens: 900,
+      top_p: 0.9,
+      stream: false,
     };
 
-    // ==========================================
-    // 5. SEND REQUEST WITH RETRIES
-    // ==========================================
+    let lastError;
 
-    let lastError = null;
-
-    for (
-      let attempt = 1;
-      attempt <= MAX_ATTEMPTS;
-      attempt++
-    ) {
-
+    for (let attempt = 1; attempt <= 2; attempt++) {
       const controller = new AbortController();
 
-      const timeoutId = setTimeout(
+      const timeout = setTimeout(
         () => controller.abort(),
-        REQUEST_TIMEOUT
+        20000
       );
 
       try {
+        const response = await fetch(GROQ_ENDPOINT, {
+          method: "POST",
 
-        const response = await fetch(
-          GEMINI_ENDPOINT,
-          {
-            method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKey}`,
+          },
 
-            headers: {
-              "Content-Type": "application/json",
-              "x-goog-api-key": apiKey,
-            },
+          body: JSON.stringify(requestBody),
+          signal: controller.signal,
+        });
 
-            body: JSON.stringify(requestBody),
-
-            signal: controller.signal,
-          }
-        );
-
-        clearTimeout(timeoutId);
-
-        // Read Gemini response
-        let result;
-
-        try {
-          result = await response.json();
-        } catch {
-          result = {};
-        }
-
-        // ==========================================
-        // 6. SUCCESS RESPONSE
-        // ==========================================
+        const result = await response.json();
 
         if (response.ok) {
-
-          const candidate = result.candidates?.[0];
-
-          const reply = candidate?.content?.parts
-            ?.map((part) => part.text || "")
-            .join("")
-            .trim();
+          const reply =
+            result.choices?.[0]?.message?.content?.trim();
 
           if (!reply) {
-
-            console.error(
-              "Gemini empty response:",
-              candidate?.finishReason
-            );
-
             return res.status(502).json({
-              error:
-                "Gemini could not generate an answer. Please try again.",
+              error: "Faseeh could not generate an answer.",
             });
           }
 
-          return res.status(200).json({
-            reply,
-          });
+          return res.status(200).json({ reply });
         }
 
-        // ==========================================
-        // 7. HANDLE API ERRORS
-        // ==========================================
-
         const errorMessage =
-          result.error?.message ||
-          "Gemini API request failed.";
+          result.error?.message || "Groq request failed.";
 
         lastError = new Error(errorMessage);
 
-        const retryableStatuses = [
-          429,
-          500,
-          502,
-          503,
-          504,
-        ];
+        const retryable = [429, 500, 502, 503, 504];
 
-        if (
-          !retryableStatuses.includes(response.status) ||
-          attempt === MAX_ATTEMPTS
-        ) {
-
-          console.error("Gemini API error:", {
+        if (!retryable.includes(response.status) || attempt === 2) {
+          console.error("Groq API error:", {
             status: response.status,
             message: errorMessage,
-            attempt,
           });
 
           return res.status(response.status).json({
@@ -284,49 +155,227 @@ ${lessonContext
           });
         }
 
+        await sleep(1000);
+
       } catch (error) {
-
-        clearTimeout(timeoutId);
-
         lastError = error;
 
-        if (attempt === MAX_ATTEMPTS) {
+        if (attempt === 2) {
+          console.error("Groq connection error:", error);
 
-          console.error(
-            "Gemini connection error:",
-            error
-          );
-
-          if (error.name === "AbortError") {
-            return res.status(504).json({
-              error: "Gemini took too long to respond. Please try again.",
-            });
-          }
-
-          return res.status(502).json({
-            error: "Could not connect to Gemini. Please try again.",
+          return res.status(
+            error.name === "AbortError" ? 504 : 502
+          ).json({
+            error:
+              error.name === "AbortError"
+                ? "Faseeh took too long to respond."
+                : "Could not connect to Groq.",
           });
         }
 
-      }
+        await sleep(500);
 
-      // Retry only when necessary
-      await sleep(500);
+      } finally {
+        clearTimeout(timeout);
+      }
     }
 
     return res.status(502).json({
-      error:
-        lastError?.message ||
-        "Gemini is temporarily unavailable.",
+      error: lastError?.message || "Groq is unavailable.",
     });
 
   } catch (error) {
-
-    console.error("FASEEH AI SERVER ERROR:", error);
+    console.error("FASEEH SERVER ERROR:", error);
 
     return res.status(500).json({
       error: "An unexpected server error occurred.",
     });
-
   }
 };
+
+// ==========================================
+// FASEEH AI - GROQ FRONTEND CONNECTION
+// ==========================================
+
+const FASEEH_API = "/api/chat";
+
+// Conversation history
+let messages = [];
+
+// Current lesson context
+let lessonContext = null;
+
+// Prevent overlapping requests
+let isThinking = false;
+
+
+// ==========================================
+// SEND MESSAGE TO FASEEH
+// ==========================================
+
+async function sendToFaseeh(userMessage) {
+
+  if (isThinking) {
+    return null;
+  }
+
+  if (
+    typeof userMessage !== "string" ||
+    !userMessage.trim()
+  ) {
+    return null;
+  }
+
+  isThinking = true;
+
+  messages.push({
+    role: "user",
+    content: userMessage.trim(),
+  });
+
+  try {
+
+    const response = await fetch(FASEEH_API, {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json",
+      },
+
+      body: JSON.stringify({
+        messages,
+        lessonContext,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error || "Faseeh could not respond."
+      );
+    }
+
+    if (!data.reply) {
+      throw new Error("Empty response from Faseeh.");
+    }
+
+    messages.push({
+      role: "assistant",
+      content: data.reply,
+    });
+
+    return data.reply;
+
+  } catch (error) {
+
+    console.error("FASEEH ERROR:", error);
+
+    // Remove unanswered message so it isn't
+    // accidentally duplicated in conversation history.
+    messages.pop();
+
+    throw error;
+
+  } finally {
+    isThinking = false;
+  }
+}
+
+
+// ==========================================
+// UPDATE LESSON CONTEXT
+// ==========================================
+
+function setFaseehLesson(lesson) {
+  lessonContext = lesson;
+}
+
+
+// ==========================================
+// CLEAR CHAT
+// ==========================================
+
+function clearFaseehChat() {
+  if (isThinking) return;
+
+  messages = [];
+}
+
+
+// ==========================================
+// GET CONVERSATION HISTORY
+// ==========================================
+
+function getFaseehMessages() {
+  return [...messages];
+}
+
+// ==========================================
+// SIMPLE FASEEH CHAT UI
+// ==========================================
+
+const chatInput = document.getElementById("chatInput");
+const sendButton = document.getElementById("sendButton");
+const chatMessages = document.getElementById("chatMessages");
+
+if (chatInput && sendButton && chatMessages) {
+
+  sendButton.addEventListener("click", handleSend);
+
+  chatInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      handleSend();
+    }
+  });
+
+  async function handleSend() {
+
+    const text = chatInput.value.trim();
+
+    if (!text || isThinking) return;
+
+    chatInput.value = "";
+
+    // Show user message
+    addMessage("user", text);
+
+    // Show loading message
+    const loading = addMessage("assistant", "فصيح يفكر...");
+
+    sendButton.disabled = true;
+
+    try {
+
+      const reply = await sendToFaseeh(text);
+
+      loading.textContent = reply;
+
+    } catch (error) {
+
+      loading.textContent =
+        "عذرًا، حدث خطأ أثناء الاتصال. حاول مرة أخرى.";
+
+      console.error(error);
+
+    } finally {
+      sendButton.disabled = false;
+    }
+  }
+
+  function addMessage(role, content) {
+
+    const message = document.createElement("div");
+
+    message.className = `message ${role}`;
+    message.textContent = content;
+
+    chatMessages.appendChild(message);
+
+    chatMessages.scrollTop =
+      chatMessages.scrollHeight;
+
+    return message;
+  }
+}
