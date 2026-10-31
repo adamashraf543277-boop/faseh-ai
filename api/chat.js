@@ -1,4 +1,5 @@
 
+
 const GROQ_ENDPOINT =
   "https://api.groq.com/openai/v1/chat/completions";
 
@@ -13,29 +14,16 @@ module.exports = async function handler(req, res) {
       error: "Method not allowed.",
     });
   }
-const text = await response.text();
-
-let data;
-
-try {
-    data = JSON.parse(text);
-} catch (error) {
-    console.error("Server returned non-JSON:", text);
-    throw new Error("The server returned an invalid response. Check Vercel Runtime Logs.");
-}
-
-if (!response.ok) {
-    throw new Error(data.error || "Server error");
-}
-  const apiKey = process.env.GROQ_API_KEY;
-
-  if (!apiKey) {
-    return res.status(500).json({
-      error: "GROQ_API_KEY is missing from Vercel.",
-    });
-  }
 
   try {
+    const apiKey = process.env.GROQ_API_KEY;
+
+    if (!apiKey) {
+      return res.status(500).json({
+        error: "GROQ_API_KEY is missing from Vercel.",
+      });
+    }
+
     const { messages, lessonContext } = req.body || {};
 
     if (!Array.isArray(messages) || !messages.length) {
@@ -89,7 +77,6 @@ ${lessonContext
 
     const requestBody = {
       model: MODEL,
-
       messages: [
         {
           role: "system",
@@ -97,7 +84,6 @@ ${lessonContext
         },
         ...validMessages,
       ],
-
       max_completion_tokens: 900,
       reasoning_effort: "low",
       stream: false,
@@ -116,12 +102,10 @@ ${lessonContext
       try {
         const response = await fetch(GROQ_ENDPOINT, {
           method: "POST",
-
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${apiKey}`,
           },
-
           body: JSON.stringify(requestBody),
           signal: controller.signal,
         });
@@ -157,13 +141,12 @@ ${lessonContext
               message,
             });
 
-            return res.status(response.status).json({
+            return res.status(502).json({
               error: message,
             });
           }
 
           await sleep(1000);
-
           continue;
         }
 
@@ -186,9 +169,7 @@ ${lessonContext
         if (attempt === 2) {
           console.error("GROQ CONNECTION ERROR:", error);
 
-          return res.status(
-            error.name === "AbortError" ? 504 : 502
-          ).json({
+          return res.status(502).json({
             error:
               error.name === "AbortError"
                 ? "Groq request timed out."
