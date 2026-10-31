@@ -1,0 +1,2143 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فصيح | منصة اللغة العربية التفاعلية - الصف السادس الابتدائي</title>
+    
+    <!-- Google Fonts (Cairo & Tajawal) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#0f382c',
+                            emerald: '#134e3a',
+                            light: '#1f6e54',
+                            gold: '#d4af37',
+                            goldlight: '#f39c12',
+                            cream: '#fdfbf7',
+                            sand: '#f5efe6',
+                            card: '#ffffff'
+                        }
+                    },
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                        tajawal: ['Tajawal', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Canvas Confetti Library for Achievements -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Cairo', 'Tajawal', sans-serif;
+            background-color: #fdfbf7;
+            color: #1a202c;
+            overflow-x: hidden;
+        }
+        
+        .flip-card {
+            background-color: transparent;
+            perspective: 1000px;
+        }
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .flip-card.flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 1rem;
+        }
+        .flip-card-back {
+            transform: rotateY(180deg);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #134e3a;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0f382c;
+        }
+
+        .gold-gradient {
+            background: linear-gradient(135deg, #d4af37 0%, #f39c12 100%);
+        }
+        .emerald-gradient {
+            background: linear-gradient(135deg, #0f382c 0%, #134e3a 100%);
+        }
+
+        /* Pulsing Voice Animation */
+        .voice-wave {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .voice-bar {
+            width: 4px;
+            height: 16px;
+            background-color: #d4af37;
+            border-radius: 2px;
+            animation: pulse 1s infinite ease-in-out;
+        }
+        .voice-bar:nth-child(2) { animation-delay: 0.2s; }
+        .voice-bar:nth-child(3) { animation-delay: 0.4s; }
+        .voice-bar:nth-child(4) { animation-delay: 0.6s; }
+        
+        @keyframes pulse {
+            0%, 100% { height: 8px; }
+            50% { height: 28px; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-brand-gold selection:text-brand-dark">
+
+    <!-- TOP NAVIGATION BAR -->
+    <header class="sticky top-0 z-40 bg-brand-dark text-white shadow-xl border-b-2 border-brand-gold">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo -->
+                <div class="flex items-center space-x-3 space-x-reverse cursor-pointer" onclick="navigateTo('home')">
+                    <div class="w-12 h-12 rounded-2xl gold-gradient flex items-center justify-center text-brand-dark font-black text-2xl shadow-lg transform hover:scale-105 transition-all">
+                        <i class="fa-solid font-black">ف</i>
+                    </div>
+                    <div>
+                        <span class="text-2xl font-black tracking-wide text-white">فصِيح <span class="text-brand-gold font-bold text-sm bg-brand-emerald px-2 py-0.5 rounded-full border border-brand-gold/30">AI</span></span>
+                        <p class="text-xs text-emerald-200">اللغة العربية - الصف السادس الابتدائي</p>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation Links -->
+                <nav class="hidden md:flex space-x-1 space-x-reverse text-sm font-bold">
+                    <button onclick="navigateTo('home')" id="nav-home" class="nav-btn px-3 py-2 rounded-xl transition flex items-center gap-2 hover:bg-brand-emerald hover:text-brand-gold text-emerald-100">
+                        <i class="fa-solid fa-house"></i> الرئيسية
+                    </button>
+                    <button onclick="navigateTo('units')" id="nav-units" class="nav-btn px-3 py-2 rounded-xl transition flex items-center gap-2 hover:bg-brand-emerald hover:text-brand-gold text-emerald-100">
+                        <i class="fa-solid fa-book-open"></i> الوحدات والدروس
+                    </button>
+                    <button onclick="navigateTo('grammar')" id="nav-grammar" class="nav-btn px-3 py-2 rounded-xl transition flex items-center gap-2 hover:bg-brand-emerald hover:text-brand-gold text-emerald-100">
+                        <i class="fa-solid fa-compass-drafting"></i> عالم النحو
+                    </button>
+                    <button onclick="navigateTo('teacher')" id="nav-teacher" class="nav-btn px-3 py-2 rounded-xl transition flex items-center gap-2 hover:bg-brand-emerald hover:text-brand-gold text-emerald-100">
+                        <i class="fa-solid fa-robot"></i> المعلم فصيح
+                    </button>
+                    <button onclick="navigateTo('games')" id="nav-games" class="nav-btn px-3 py-2 rounded-xl transition flex items-center gap-2 hover:bg-brand-emerald hover:text-brand-gold text-emerald-100">
+                        <i class="fa-solid fa-gamepad"></i> الألعاب
+                    </button>
+                    <button onclick="navigateTo('exams')" id="nav-exams" class="nav-btn px-3 py-2 rounded-xl transition flex items-center gap-2 hover:bg-brand-emerald hover:text-brand-gold text-emerald-100">
+                        <i class="fa-solid fa-file-pen"></i> الاختبارات
+                    </button>
+                    <button onclick="navigateTo('dashboard')" id="nav-dashboard" class="nav-btn px-3 py-2 rounded-xl transition flex items-center gap-2 hover:bg-brand-emerald hover:text-brand-gold text-emerald-100">
+                        <i class="fa-solid fa-trophy"></i> إنجازاتي
+                    </button>
+                </nav>
+
+                <!-- Top Right Stats & Admin Button -->
+                <div class="hidden lg:flex items-center space-x-4 space-x-reverse">
+                    <div class="flex items-center bg-brand-emerald px-3 py-1.5 rounded-full border border-brand-gold/30">
+                        <i class="fa-solid fa-bolt text-brand-gold ml-2 animate-bounce"></i>
+                        <span id="user-xp-display" class="font-bold text-white text-sm">0 XP</span>
+                    </div>
+                    <button onclick="openAdminModal()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600 px-3 py-2 rounded-xl flex items-center gap-1 transition">
+                        <i class="fa-solid fa-gear"></i> الإدارة
+                    </button>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden flex items-center gap-2">
+                    <button onclick="toggleMobileMenu()" class="text-white hover:text-brand-gold text-2xl p-2 focus:outline-none">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-brand-dark border-t border-brand-emerald px-4 pt-2 pb-6 space-y-2">
+            <button onclick="navigateTo('home'); toggleMobileMenu();" class="w-full text-right py-2.5 px-3 rounded-lg hover:bg-brand-emerald text-white font-semibold">
+                <i class="fa-solid fa-house ml-2"></i> الرئيسية
+            </button>
+            <button onclick="navigateTo('units'); toggleMobileMenu();" class="w-full text-right py-2.5 px-3 rounded-lg hover:bg-brand-emerald text-white font-semibold">
+                <i class="fa-solid fa-book-open ml-2"></i> الوحدات والدروس
+            </button>
+            <button onclick="navigateTo('grammar'); toggleMobileMenu();" class="w-full text-right py-2.5 px-3 rounded-lg hover:bg-brand-emerald text-white font-semibold">
+                <i class="fa-solid fa-compass-drafting ml-2"></i> عالم النحو
+            </button>
+            <button onclick="navigateTo('teacher'); toggleMobileMenu();" class="w-full text-right py-2.5 px-3 rounded-lg hover:bg-brand-emerald text-white font-semibold">
+                <i class="fa-solid fa-robot ml-2"></i> المعلم فصيح
+            </button>
+            <button onclick="navigateTo('games'); toggleMobileMenu();" class="w-full text-right py-2.5 px-3 rounded-lg hover:bg-brand-emerald text-white font-semibold">
+                <i class="fa-solid fa-gamepad ml-2"></i> الألعاب والأنشطة
+            </button>
+            <button onclick="navigateTo('exams'); toggleMobileMenu();" class="w-full text-right py-2.5 px-3 rounded-lg hover:bg-brand-emerald text-white font-semibold">
+                <i class="fa-solid fa-file-pen ml-2"></i> بنك الاختبارات
+            </button>
+            <button onclick="navigateTo('dashboard'); toggleMobileMenu();" class="w-full text-right py-2.5 px-3 rounded-lg hover:bg-brand-emerald text-white font-semibold">
+                <i class="fa-solid fa-trophy ml-2"></i> لوحة الإنجازات
+            </button>
+            <button onclick="openAdminModal(); toggleMobileMenu();" class="w-full text-right py-2.5 px-3 rounded-lg bg-slate-800 text-slate-200 font-semibold">
+                <i class="fa-solid fa-gear ml-2"></i> لوحة التحكم الإدارية
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- 1. HOMEPAGE SECTION -->
+        <section id="section-home" class="space-y-12">
+            <!-- Hero Banner -->
+            <div class="relative overflow-hidden rounded-3xl emerald-gradient text-white p-8 sm:p-12 shadow-2xl border-2 border-brand-gold/30">
+                <div class="absolute -left-10 -bottom-10 opacity-10 text-9xl text-white font-black select-none">فصيح</div>
+                <div class="relative z-10 max-w-3xl">
+                    <span class="inline-flex items-center gap-2 px-3 me-2 py-1 rounded-full text-xs font-extrabold gold-gradient text-brand-dark mb-4">
+                        <i class="fa-solid fa-sparkles"></i> المنهج المصري الحديث 2026
+                    </span>
+                    <h1 class="text-3xl sm:text-5xl font-black leading-tight mb-4">
+                        رحلتك الممتعة لتعلم <span class="text-brand-gold underline decoration-wavy underline-offset-8">اللغة العربية</span> بذكاء!
+                    </h1>
+                    <p class="text-emerald-100 text-base sm:text-lg mb-8 leading-relaxed">
+                        منصة تفاعلية مخصصة لطلاب الصف السادس الابتدائي. استكشف الوحدة الأولى (أطور ذاتي) والوحدة الثانية (أنا مسئول) حتى الصفحة 79 بشرح مبسط، ألعاب تفاعلية، ومعلم ذكاء اصطناعي خاص بك.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <button onclick="navigateTo('units')" class="gold-gradient text-brand-dark font-extrabold px-8 py-4 rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition text-lg flex items-center gap-3">
+                            <i class="fa-solid fa-play"></i> ابدأ التعلم الآن
+                        </button>
+                        <button onclick="navigateTo('teacher')" class="bg-white/10 backdrop-blur-md text-white font-bold px-6 py-4 rounded-2xl border border-white/20 hover:bg-white/20 transition flex items-center gap-2">
+                            <i class="fa-solid fa-comments"></i> تحدث مع "المعلم فصيح"
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Units Overview Cards -->
+            <div>
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-2xl sm:text-3xl font-black text-brand-dark">وحدات المنهج الدراسي</h2>
+                        <p class="text-slate-500 text-sm">مقرر الفصل الدراسي الأول - حتى ص 79</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Unit 1 Card -->
+                    <div class="bg-white rounded-3xl p-6 sm:p-8 border-2 border-emerald-100 shadow-lg hover:shadow-xl transition relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-3 h-full bg-brand-emerald"></div>
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="bg-emerald-50 text-brand-emerald text-xs font-bold px-3 py-1 rounded-full border border-emerald-200">
+                                الوحدة الأولى (ص 7 - ص 49)
+                            </span>
+                            <span class="text-xs text-slate-400 font-bold">4 دروس كاملة</span>
+                        </div>
+                        <h3 class="text-2xl font-black text-brand-dark mb-2 group-hover:text-brand-emerald transition">أُطَوِّرُ ذَاتِي</h3>
+                        <p class="text-slate-600 text-sm mb-6 leading-relaxed">
+                            تتضمن مهارات التخطيط، تقدير الوقت، اتخاذ القرار، والنص الشعري "إلى الشباب" لإبراهيم ناجي، مع قواعد النكرة والمعرفة والهمزة المتوسطة على الألف.
+                        </p>
+                        <div class="space-y-2 mb-6 text-xs text-slate-500 font-medium">
+                            <div class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-brand-gold"></i> استماع: سمر تطور نفسها</div>
+                            <div class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-brand-gold"></i> قراءة: كنز لا يقدر بثمن & اصنع قرارك</div>
+                            <div class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-brand-gold"></i> شعر: إلى الشباب - إبراهيم ناجي</div>
+                        </div>
+                        <button onclick="openUnitLessons(1)" class="w-full py-3 bg-brand-emerald text-white rounded-xl font-bold hover:bg-brand-dark transition flex items-center justify-center gap-2">
+                            <span>عرض دروس الوحدة</span> <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+                    </div>
+
+                    <!-- Unit 2 Card -->
+                    <div class="bg-white rounded-3xl p-6 sm:p-8 border-2 border-amber-100 shadow-lg hover:shadow-xl transition relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-3 h-full bg-brand-gold"></div>
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="bg-amber-50 text-brand-goldlight text-xs font-bold px-3 py-1 rounded-full border border-amber-200">
+                                الوحدة الثانية (ص 53 - ص 79)
+                            </span>
+                            <span class="text-xs text-slate-400 font-bold">4 دروس كاملة</span>
+                        </div>
+                        <h3 class="text-2xl font-black text-brand-dark mb-2 group-hover:text-brand-goldlight transition">أَنَا مَسْؤُولٌ</h3>
+                        <p class="text-slate-600 text-sm mb-6 leading-relaxed">
+                            تتناول المسؤولية، قوة الكلمات، سر النجاح، ونص "بناة المجد"، مع قواعد الأسماء الخمسة، أنواع الخبر، والهمزة المتوسطة على الياء.
+                        </p>
+                        <div class="space-y-2 mb-6 text-xs text-slate-500 font-medium">
+                            <div class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-brand-emerald"></i> استماع: من هم الناجحون؟</div>
+                            <div class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-brand-emerald"></i> قراءة: قوة الكلمات & سر القوة والنجاح</div>
+                            <div class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-brand-emerald"></i> شعر: بناة المجد - عبد العزيز عتيق</div>
+                        </div>
+                        <button onclick="openUnitLessons(2)" class="w-full py-3 bg-brand-gold text-brand-dark font-extrabold rounded-xl hover:bg-brand-goldlight transition flex items-center justify-center gap-2">
+                            <span>عرض دروس الوحدة</span> <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Features Highlights Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+                <div onclick="navigateTo('grammar')" class="bg-white p-5 rounded-2xl border border-slate-200 text-center cursor-pointer hover:border-brand-emerald hover:shadow-lg transition">
+                    <div class="w-12 h-12 mx-auto mb-3 bg-emerald-100 rounded-2xl flex items-center justify-center text-brand-emerald text-xl">
+                        <i class="fa-solid fa-compass-drafting"></i>
+                    </div>
+                    <h4 class="font-bold text-brand-dark mb-1">عالم النحو</h4>
+                    <p class="text-xs text-slate-500">الإعراب والقواعد المباشرة</p>
+                </div>
+                <div onclick="navigateTo('games')" class="bg-white p-5 rounded-2xl border border-slate-200 text-center cursor-pointer hover:border-brand-gold hover:shadow-lg transition">
+                    <div class="w-12 h-12 mx-auto mb-3 bg-amber-100 rounded-2xl flex items-center justify-center text-brand-goldlight text-xl">
+                        <i class="fa-solid fa-gamepad"></i>
+                    </div>
+                    <h4 class="font-bold text-brand-dark mb-1">الألعاب التعليمية</h4>
+                    <p class="text-xs text-slate-500">تحديات ومسابقات شائقة</p>
+                </div>
+                <div onclick="navigateTo('exams')" class="bg-white p-5 rounded-2xl border border-slate-200 text-center cursor-pointer hover:border-indigo-500 hover:shadow-lg transition">
+                    <div class="w-12 h-12 mx-auto mb-3 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 text-xl">
+                        <i class="fa-solid fa-file-circle-check"></i>
+                    </div>
+                    <h4 class="font-bold text-brand-dark mb-1">بنك الاختبارات</h4>
+                    <p class="text-xs text-slate-500">تقييمات شاملة وتصحيح آلي</p>
+                </div>
+                <div onclick="navigateTo('dashboard')" class="bg-white p-5 rounded-2xl border border-slate-200 text-center cursor-pointer hover:border-purple-500 hover:shadow-lg transition">
+                    <div class="w-12 h-12 mx-auto mb-3 bg-purple-100 rounded-2xl flex items-center justify-center text-purple-600 text-xl">
+                        <i class="fa-solid fa-medal"></i>
+                    </div>
+                    <h4 class="font-bold text-brand-dark mb-1">لوحة الإنجازات</h4>
+                    <p class="text-xs text-slate-500">أوسمة وشهادات تقدير</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. UNITS & LESSONS SECTION -->
+        <section id="section-units" class="hidden space-y-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-4 border-slate-200">
+                <div>
+                    <h2 class="text-3xl font-black text-brand-dark">الوحدات والدروس التفاعلية</h2>
+                    <p class="text-slate-500 text-sm">تصفح الدروس وفقاً للكتاب المدرسي المعتمد</p>
+                </div>
+                <!-- Unit Switcher Tabs -->
+                <div class="inline-flex p-1 bg-slate-200/60 rounded-2xl space-x-1 space-x-reverse self-start">
+                    <button id="unit-tab-1" onclick="switchUnitTab(1)" class="px-5 py-2.5 rounded-xl font-bold text-sm transition bg-white text-brand-emerald shadow-sm">
+                        الوحدة الأولى: أطور ذاتي
+                    </button>
+                    <button id="unit-tab-2" onclick="switchUnitTab(2)" class="px-5 py-2.5 rounded-xl font-bold text-sm transition text-slate-600 hover:text-brand-dark">
+                        الوحدة الثانية: أنا مسئول
+                    </button>
+                </div>
+            </div>
+
+            <!-- Lessons Grid Container -->
+            <div id="lessons-grid-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Dynamic Lessons Cards loaded via JS -->
+            </div>
+        </section>
+
+        <!-- 2.B LESSON VIEWER (STAGE SYSTEM) -->
+        <section id="section-lesson-viewer" class="hidden space-y-6">
+            <!-- Header Breadcrumb & Controls -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <button onclick="navigateTo('units')" class="text-xs font-bold text-brand-emerald hover:underline mb-2 inline-flex items-center gap-1">
+                        <i class="fa-solid fa-arrow-right"></i> العودة للدروس
+                    </button>
+                    <h2 id="viewer-lesson-title" class="text-2xl font-black text-brand-dark">عنوان الدرس</h2>
+                    <p id="viewer-lesson-meta" class="text-xs text-slate-500 font-medium">الوحدة الأولى • ص 7-8</p>
+                </div>
+
+                <!-- 4 Stage Progress Nav -->
+                <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0">
+                    <button onclick="switchStage(1)" id="stage-btn-1" class="stage-tab px-4 py-2 rounded-xl text-xs font-bold transition border flex items-center gap-2 bg-brand-emerald text-white border-brand-emerald">
+                        <span class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[10px]">1</span> الشرح والشعر
+                    </button>
+                    <button onclick="switchStage(2)" id="stage-btn-2" class="stage-tab px-4 py-2 rounded-xl text-xs font-bold transition border flex items-center gap-2 bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200">
+                        <span class="w-5 h-5 rounded-full bg-slate-300 flex items-center justify-center text-[10px]">2</span> المفردات
+                    </button>
+                    <button onclick="switchStage(3)" id="stage-btn-3" class="stage-tab px-4 py-2 rounded-xl text-xs font-bold transition border flex items-center gap-2 bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200">
+                        <span class="w-5 h-5 rounded-full bg-slate-300 flex items-center justify-center text-[10px]">3</span> التمارين
+                    </button>
+                    <button onclick="switchStage(4)" id="stage-btn-4" class="stage-tab px-4 py-2 rounded-xl text-xs font-bold transition border flex items-center gap-2 bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200">
+                        <span class="w-5 h-5 rounded-full bg-slate-300 flex items-center justify-center text-[10px]">4</span> الاختبار
+                    </button>
+                </div>
+            </div>
+
+            <!-- STAGE 1: AI LESSON / AUDIO TEXT VIEW -->
+            <div id="stage-content-1" class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-lg space-y-6">
+                <!-- Audio Narrator Controls Bar -->
+                <div class="bg-brand-sand/50 p-4 rounded-2xl border border-brand-gold/20 flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <button id="tts-play-btn" onclick="toggleAudioNarrative()" class="w-12 h-12 rounded-full gold-gradient text-brand-dark font-bold text-lg flex items-center justify-center shadow-md hover:scale-105 transition">
+                            <i id="tts-icon" class="fa-solid fa-play"></i>
+                        </button>
+                        <div>
+                            <h4 class="font-bold text-brand-dark text-sm">المستمع الذكي - قراءة النص بالصوت</h4>
+                            <p class="text-xs text-slate-500">انقر للاستماع لنص الدرس بصوت فصيح</p>
+                        </div>
+                    </div>
+                    <div id="tts-wave-container" class="hidden flex items-center gap-2">
+                        <div class="voice-wave">
+                            <div class="voice-bar"></div>
+                            <div class="voice-bar"></div>
+                            <div class="voice-bar"></div>
+                            <div class="voice-bar"></div>
+                        </div>
+                        <span class="text-xs text-brand-emerald font-bold mr-2">جاري القراءة...</span>
+                    </div>
+                </div>
+
+                <!-- Text / Poem Display Box -->
+                <div class="prose max-w-none">
+                    <div id="lesson-text-body" class="text-slate-800 text-lg leading-loose space-y-4 font-medium p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+
+                <!-- Grammar / Spelling Sidebar Note embedded in stage 1 -->
+                <div id="lesson-grammar-box" class="p-5 bg-emerald-50/70 border border-emerald-200 rounded-2xl text-emerald-900 space-y-2">
+                    <!-- Loaded dynamically -->
+                </div>
+            </div>
+
+            <!-- STAGE 2: FLASHCARDS VOCABULARY -->
+            <div id="stage-content-2" class="hidden space-y-6">
+                <div class="text-center max-w-lg mx-auto mb-4">
+                    <h3 class="text-xl font-bold text-brand-dark">بطاقات المعاني والمفردات التفاعلية</h3>
+                    <p class="text-xs text-slate-500 mt-1">انقر على البطاقة لقلبها واكتشاف المعنى المدرسي الدقيق</p>
+                </div>
+                <div id="vocab-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Dynamic Flashcards Loaded Here -->
+                </div>
+            </div>
+
+            <!-- STAGE 3: INTERACTIVE EXERCISES -->
+            <div id="stage-content-3" class="hidden space-y-6">
+                <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-md">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-brand-dark flex items-center gap-2">
+                            <i class="fa-solid fa-pen-ruler text-brand-gold"></i> تمارين وتدريبات الدرس
+                        </h3>
+                        <span id="exercise-score" class="text-xs font-bold bg-amber-100 text-amber-800 px-3 py-1 rounded-full">درجة التمارين: 0</span>
+                    </div>
+
+                    <div id="exercises-list-container" class="space-y-8">
+                        <!-- Dynamic Exercise Items -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 4: LESSON QUIZ -->
+            <div id="stage-content-4" class="hidden space-y-6">
+                <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-lg">
+                    <div class="border-b pb-4 mb-6 flex justify-between items-center">
+                        <div>
+                            <h3 class="text-2xl font-black text-brand-dark">الاختبار السريع للدرس</h3>
+                            <p class="text-xs text-slate-500">أجب عن الأسئلة التالية لاكتساب النقاط والوسام</p>
+                        </div>
+                        <div class="text-left">
+                            <span class="text-xs text-slate-400 block">الدرجة الكلية</span>
+                            <span class="text-lg font-black text-brand-emerald">100 نقطة</span>
+                        </div>
+                    </div>
+
+                    <form id="lesson-quiz-form" onsubmit="submitLessonQuiz(event)" class="space-y-8">
+                        <div id="quiz-questions-container" class="space-y-6">
+                            <!-- Dynamic Questions -->
+                        </div>
+
+                        <button type="submit" class="w-full py-4 gold-gradient text-brand-dark font-extrabold text-lg rounded-2xl shadow-lg hover:shadow-xl transition">
+                            <i class="fa-solid fa-paper-plane me-2"></i> تسليم الاختبار وحساب النتيجة
+                        </button>
+                    </form>
+
+                    <!-- Quiz Result Box -->
+                    <div id="quiz-result-box" class="hidden mt-8 p-6 rounded-2xl text-center border-2"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. GRAMMAR WORLD SECTION -->
+        <section id="section-grammar" class="hidden space-y-8">
+            <div class="bg-brand-dark text-white p-8 rounded-3xl border-2 border-brand-gold/30 shadow-xl relative overflow-hidden">
+                <div class="relative z-10 max-w-2xl">
+                    <span class="bg-brand-gold/20 text-brand-gold text-xs font-bold px-3 py-1 rounded-full border border-brand-gold/30 mb-3 inline-block">مملكة القواعد والنحو</span>
+                    <h2 class="text-3xl font-black text-white mb-2">عَالَمُ النَّحْوِ وَالإِعْرَابِ</h2>
+                    <p class="text-emerald-100 text-sm leading-relaxed">
+                        استكشف قواعد النحو والإملاء المقررة في الوحدتين الأولى والثانية بأسلوب مبسط ومعرب بشكل كامل.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Grammar Rules Cards Tabs -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Left Rules Menu -->
+                <div class="space-y-3">
+                    <button onclick="loadGrammarDetail('nakira')" id="gtab-nakira" class="g-tab-btn w-full text-right p-4 rounded-2xl bg-white border-2 border-brand-emerald text-brand-dark font-bold shadow-sm flex items-center justify-between transition">
+                        <span>1. النكرة والمعرفة</span>
+                        <i class="fa-solid fa-chevron-left text-xs text-slate-400"></i>
+                    </button>
+                    <button onclick="loadGrammarDetail('types_marifa')" id="gtab-types_marifa" class="g-tab-btn w-full text-right p-4 rounded-2xl bg-white border border-slate-200 text-slate-700 font-bold hover:bg-slate-50 transition flex items-center justify-between">
+                        <span>2. أنواع المعارف</span>
+                        <i class="fa-solid fa-chevron-left text-xs text-slate-400"></i>
+                    </button>
+                    <button onclick="loadGrammarDetail('asmaa_khamsa')" id="gtab-asmaa_khamsa" class="g-tab-btn w-full text-right p-4 rounded-2xl bg-white border border-slate-200 text-slate-700 font-bold hover:bg-slate-50 transition flex items-center justify-between">
+                        <span>3. الأسماء الخمسة وإعرابها</span>
+                        <i class="fa-solid fa-chevron-left text-xs text-slate-400"></i>
+                    </button>
+                    <button onclick="loadGrammarDetail('khabar_types')" id="gtab-khabar_types" class="g-tab-btn w-full text-right p-4 rounded-2xl bg-white border border-slate-200 text-slate-700 font-bold hover:bg-slate-50 transition flex items-center justify-between">
+                        <span>4. أنواع الخبر</span>
+                        <i class="fa-solid fa-chevron-left text-xs text-slate-400"></i>
+                    </button>
+                    <button onclick="loadGrammarDetail('spelling_hamza')" id="gtab-spelling_hamza" class="g-tab-btn w-full text-right p-4 rounded-2xl bg-white border border-slate-200 text-slate-700 font-bold hover:bg-slate-50 transition flex items-center justify-between">
+                        <span>5. الإملاء: الهمزة المتوسطة</span>
+                        <i class="fa-solid fa-chevron-left text-xs text-slate-400"></i>
+                    </button>
+                </div>
+
+                <!-- Right Detail & Practice Box -->
+                <div class="lg:col-span-2 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-lg space-y-6">
+                    <div id="grammar-detail-container" class="space-y-6">
+                        <!-- Loaded dynamically -->
+                    </div>
+
+                    <!-- Interactive Parsing Simulator -->
+                    <div class="border-t pt-6">
+                        <h4 class="font-bold text-brand-dark mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-magnifying-glass text-brand-gold"></i> ورشة الإعراب التفاعلي
+                        </h4>
+                        <div id="interactive-parsing-box" class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
+                            <!-- Parsed dynamic exercise -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. AI TEACHER FASEEH SIMULATION -->
+        <section id="section-teacher" class="hidden space-y-6">
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden flex flex-col h-[650px]">
+                <!-- Chat Header -->
+                <div class="emerald-gradient p-5 text-white flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="relative">
+                            <div class="w-12 h-12 rounded-2xl gold-gradient flex items-center justify-center text-brand-dark text-2xl font-black shadow">
+                                <i class="fa-solid fa-robot"></i>
+                            </div>
+                            <span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-400 border-2 border-white rounded-full"></span>
+                        </div>
+                        <div>
+                            <h3 class="font-black text-lg">المعلم فصيح الذكي</h3>
+                            <p class="text-xs text-emerald-200">متصل الآن • خبير المنهج الدراسي حتى صفحة 79</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="clearChatHistory()" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-xl text-xs text-white transition">
+                            <i class="fa-solid fa-trash-can me-1"></i> مسح المحادثة
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Chat Scroll Messages Area -->
+                <div id="chat-messages" class="flex-grow p-6 overflow-y-auto space-y-4 bg-slate-50/50">
+                    <!-- Default Welcome Message -->
+                    <div class="flex gap-3 max-w-xl">
+                        <div class="w-9 h-9 rounded-xl bg-brand-emerald text-brand-gold flex-shrink-0 flex items-center justify-center font-bold">ف</div>
+                        <div class="bg-white p-4 rounded-2xl rounded-tr-none border border-slate-200 text-slate-800 text-sm shadow-sm space-y-2">
+                            <p class="font-bold text-brand-emerald">أهلاً بك يا بطل! أنا "المعلم فصيح" 🎓</p>
+                            <p>يمكنك سؤالي عن أي درس في الوحدة الأولى أو الثانية، أو استفسار عن إعراب كلمة، أو قواعد الهمزة المتوسطة!</p>
+                            <div class="flex flex-wrap gap-2 pt-2">
+                                <button onclick="quickAsk('ما هي الأسماء الخمسة وما علامات إعرابها؟')" class="text-xs bg-emerald-50 text-brand-emerald border border-emerald-200 px-3 py-1.5 rounded-full hover:bg-brand-emerald hover:text-white transition">
+                                    💡 ما هي الأسماء الخمسة؟
+                                </button>
+                                <button onclick="quickAsk('شرح قاعدة الهمزة المتوسطة على الألف')" class="text-xs bg-emerald-50 text-brand-emerald border border-emerald-200 px-3 py-1.5 rounded-full hover:bg-brand-emerald hover:text-white transition">
+                                    💡 الهمزة المتوسطة على الألف
+                                </button>
+                                <button onclick="quickAsk('ما معنى كلمة (عواقبها) و (التشتت)؟')" class="text-xs bg-emerald-50 text-brand-emerald border border-emerald-200 px-3 py-1.5 rounded-full hover:bg-brand-emerald hover:text-white transition">
+                                    💡 معاني المفردات الصعبة
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Input Controls Bar -->
+                <div class="p-4 bg-white border-t border-slate-200">
+                    <form onsubmit="handleUserChatSubmit(event)" class="flex items-center gap-2">
+                        <button type="button" id="voice-input-btn" onclick="toggleVoiceInput()" class="w-12 h-12 rounded-2xl bg-slate-100 hover:bg-amber-100 text-slate-600 hover:text-brand-gold transition flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-microphone"></i>
+                        </button>
+                        <input id="chat-user-input" type="text" placeholder="اسأل المعلم فصيح عن قواعد النحو، المعاني، أو الشرح..." class="flex-grow px-4 py-3 bg-slate-100 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-emerald">
+                        <button type="submit" class="px-6 py-3 gold-gradient text-brand-dark font-black rounded-2xl shadow hover:opacity-90 transition flex items-center gap-2">
+                            <span>إرسال</span>
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. EDUCATIONAL GAMES SECTION -->
+        <section id="section-games" class="hidden space-y-8">
+            <div class="text-center max-w-2xl mx-auto">
+                <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">تعلم باللعب</span>
+                <h2 class="text-3xl font-black text-brand-dark mt-2">الألعاب والأنشطة اللغوية</h2>
+                <p class="text-slate-500 text-sm mt-1">اختبر مهاراتك في النحو والإملاء والمفردات في جو ممتع</p>
+            </div>
+
+            <!-- Games Hub Selection Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Game 1 -->
+                <div onclick="launchGame('grammar')" class="bg-white p-6 rounded-3xl border-2 border-slate-200 hover:border-brand-emerald shadow-lg hover:shadow-xl transition cursor-pointer text-center group">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-emerald-100 text-brand-emerald rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h3 class="font-black text-lg text-brand-dark mb-2">تحدي فرسان النحو</h3>
+                    <p class="text-xs text-slate-500 mb-4">صنّف الأسماء بين (نكرة) و (معرفة) بأسرع وقت!</p>
+                    <span class="text-xs font-bold text-brand-emerald bg-emerald-50 px-3 py-1.5 rounded-full inline-block">ابدأ اللعبة</span>
+                </div>
+
+                <!-- Game 2 -->
+                <div onclick="launchGame('vocab')" class="bg-white p-6 rounded-3xl border-2 border-slate-200 hover:border-brand-gold shadow-lg hover:shadow-xl transition cursor-pointer text-center group">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-amber-100 text-brand-goldlight rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition">
+                        <i class="fa-solid fa-link"></i>
+                    </div>
+                    <h3 class="font-black text-lg text-brand-dark mb-2">توصيل المفردات</h3>
+                    <p class="text-xs text-slate-500 mb-4">صل بين الكلمة ومعناها الصحيح من الكتاب المدرسي</p>
+                    <span class="text-xs font-bold text-brand-goldlight bg-amber-50 px-3 py-1.5 rounded-full inline-block">ابدأ اللعبة</span>
+                </div>
+
+                <!-- Game 3 -->
+                <div onclick="launchGame('spelling')" class="bg-white p-6 rounded-3xl border-2 border-slate-200 hover:border-red-400 shadow-lg hover:shadow-xl transition cursor-pointer text-center group">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition">
+                        <i class="fa-solid fa-spell-check"></i>
+                    </div>
+                    <h3 class="font-black text-lg text-brand-dark mb-2">صائد الأخطاء الإملائية</h3>
+                    <p class="text-xs text-slate-500 mb-4">اكتشف الكلمة ذات الهمزة المتوسطة الخاطئة</p>
+                    <span class="text-xs font-bold text-red-600 bg-red-50 px-3 py-1.5 rounded-full inline-block">ابدأ اللعبة</span>
+                </div>
+
+                <!-- Game 4 -->
+                <div onclick="launchGame('builder')" class="bg-white p-6 rounded-3xl border-2 border-slate-200 hover:border-purple-500 shadow-lg hover:shadow-xl transition cursor-pointer text-center group">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition">
+                        <i class="fa-solid fa-cubes"></i>
+                    </div>
+                    <h3 class="font-black text-lg text-brand-dark mb-2">مهندس الجمل</h3>
+                    <p class="text-xs text-slate-500 mb-4">رتب الكلمات لتكوين جمل اسمية معبرة بحسب الدرس</p>
+                    <span class="text-xs font-bold text-purple-600 bg-purple-50 px-3 py-1.5 rounded-full inline-block">ابدأ اللعبة</span>
+                </div>
+            </div>
+
+            <!-- Game Interactive Area Container -->
+            <div id="game-arena" class="hidden bg-white p-8 rounded-3xl border-2 border-brand-gold shadow-2xl space-y-6">
+                <!-- Loaded dynamically -->
+            </div>
+        </section>
+
+        <!-- 6. EXAMINATIONS BANK SECTION -->
+        <section id="section-exams" class="hidden space-y-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-4">
+                <div>
+                    <h2 class="text-3xl font-black text-brand-dark">بنك الاختبارات والتقييمات</h2>
+                    <p class="text-slate-500 text-sm">اختبارات شاملة تحاكي أسئلة الامتحانات الشهرية والنهائية</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Exam 1 -->
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-md space-y-4">
+                    <div class="w-12 h-12 bg-emerald-100 text-brand-emerald rounded-2xl flex items-center justify-center text-xl font-bold">
+                        1
+                    </div>
+                    <h3 class="text-xl font-black text-brand-dark">اختبار الوحدة الأولى (أطور ذاتي)</h3>
+                    <p class="text-xs text-slate-500">يشمل نصوص الاستماع، المعاني، القواعد النحوية والإملائية ص 7 - 49</p>
+                    <button onclick="startComprehensiveExam(1)" class="w-full py-3 bg-brand-emerald text-white font-bold rounded-xl hover:bg-brand-dark transition">
+                        بدء اختبار الوحدة الأولى
+                    </button>
+                </div>
+
+                <!-- Exam 2 -->
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-md space-y-4">
+                    <div class="w-12 h-12 bg-amber-100 text-brand-goldlight rounded-2xl flex items-center justify-center text-xl font-bold">
+                        2
+                    </div>
+                    <h3 class="text-xl font-black text-brand-dark">اختبار الوحدة الثانية (أنا مسئول)</h3>
+                    <p class="text-xs text-slate-500">يشمل الأسماء الخمسة، أنواع الخبر، والهمزة على الياء ص 53 - 79</p>
+                    <button onclick="startComprehensiveExam(2)" class="w-full py-3 bg-brand-gold text-brand-dark font-black rounded-xl hover:bg-brand-goldlight transition">
+                        بدء اختبار الوحدة الثانية
+                    </button>
+                </div>
+
+                <!-- Final Exam -->
+                <div class="bg-white p-6 rounded-3xl border-2 border-brand-gold shadow-xl space-y-4 relative overflow-hidden">
+                    <div class="w-12 h-12 gold-gradient text-brand-dark rounded-2xl flex items-center justify-center text-xl font-black">
+                        🏆
+                    </div>
+                    <h3 class="text-xl font-black text-brand-dark">الاختبار النهائي الشامل (ص 1-79)</h3>
+                    <p class="text-xs text-slate-500">اختبار شامل لقياس أداء الطالب قبل التقييم المدرسي</p>
+                    <button onclick="startComprehensiveExam('final')" class="w-full py-3 gold-gradient text-brand-dark font-black rounded-xl shadow-md hover:scale-102 transition">
+                        بدء الاختبار الشامل
+                    </button>
+                </div>
+            </div>
+
+            <!-- Exam Dynamic Engine Modal View -->
+            <div id="exam-engine-container" class="hidden bg-white p-8 rounded-3xl border border-slate-200 shadow-2xl space-y-6">
+                <!-- Loaded dynamically -->
+            </div>
+        </section>
+
+        <!-- 7. STUDENT DASHBOARD & ACHIEVEMENTS -->
+        <section id="section-dashboard" class="hidden space-y-8">
+            <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-lg flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="flex items-center gap-6">
+                    <div class="w-20 h-20 rounded-full gold-gradient flex items-center justify-center text-brand-dark text-4xl font-black shadow-lg">
+                        🎓
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-black text-brand-dark" id="dash-student-name">البطل الفصيح</h2>
+                        <p class="text-xs text-slate-500 mt-1">الصف السادس الابتدائي • الفصل الدراسي الأول</p>
+                        <div class="flex gap-2 mt-3">
+                            <span class="bg-emerald-100 text-brand-emerald text-xs font-bold px-3 py-1 rounded-full" id="dash-level-badge font-bold">المستوى: متميز</span>
+                            <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full" id="dash-total-xp">0 XP</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="generateCertificate()" class="px-6 py-3 bg-brand-dark text-brand-gold border border-brand-gold font-bold rounded-2xl shadow hover:bg-brand-emerald transition flex items-center gap-2">
+                    <i class="fa-solid fa-file-certificate text-lg"></i>
+                    <span>تحميل شهادة التفوق</span>
+                </button>
+            </div>
+
+            <!-- Badges & Achievements Grid -->
+            <div>
+                <h3 class="text-xl font-black text-brand-dark mb-4">أوسمة التفوق والشارات</h3>
+                <div id="badges-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+                    <!-- Dynamic Badges -->
+                </div>
+            </div>
+
+            <!-- Progress Details -->
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                <h3 class="font-bold text-brand-dark">تفاصيل التقدم الأكاديمي</h3>
+                <div class="space-y-3 text-sm">
+                    <div>
+                        <div class="flex justify-between mb-1 font-semibold text-xs text-slate-600">
+                            <span>الدروس المكتملة</span>
+                            <span id="dash-lessons-progress-text">0 / 8</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-3">
+                            <div id="dash-lessons-progress-bar" class="bg-brand-emerald h-3 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1 font-semibold text-xs text-slate-600">
+                            <span>متوسط درجات الاختبارات</span>
+                            <span id="dash-quiz-avg-text">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-3">
+                            <div id="dash-quiz-avg-bar" class="bg-brand-gold h-3 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ADMIN CMS MODAL -->
+    <div id="admin-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 space-y-6 relative shadow-2xl border-2 border-brand-gold">
+            <button onclick="closeAdminModal()" class="absolute top-6 left-6 text-slate-400 hover:text-slate-700 text-xl font-bold">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="border-b pb-4">
+                <h3 class="text-2xl font-black text-brand-dark">لوحة التحكم في المحتوى (CMS)</h3>
+                <p class="text-xs text-slate-500">إدارة الدروس، المفردات، وتصدير/استيراد المحتوى المخصص</p>
+            </div>
+
+            <!-- Content Import/Export Controls -->
+            <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                <h4 class="font-bold text-sm text-brand-dark">نسخ وتحميل بيانات المنهج الدراسي</h4>
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="exportCurriculumJSON()" class="px-4 py-2 bg-brand-emerald text-white rounded-xl text-xs font-bold hover:bg-brand-dark transition">
+                        <i class="fa-solid fa-download me-1"></i> تصدير curriculum.json
+                    </button>
+                    <label class="px-4 py-2 bg-slate-800 text-white rounded-xl text-xs font-bold hover:bg-slate-700 transition cursor-pointer">
+                        <i class="fa-solid fa-upload me-1"></i> استيراد ملف JSON
+                        <input type="file" accept=".json" onchange="importCurriculumJSON(event)" class="hidden">
+                    </label>
+                    <button onclick="resetDefaultCurriculum()" class="px-4 py-2 bg-red-100 text-red-700 rounded-xl text-xs font-bold hover:bg-red-200 transition">
+                        إعادة ضبط المنهج الأصلي
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dynamic Lesson Add Form -->
+            <div class="space-y-4">
+                <h4 class="font-bold text-sm text-brand-dark">إضافة أو تعديل إرشادي لدرس</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <input id="admin-input-title" type="text" placeholder="عنوان الدرس الجديد..." class="p-3 bg-slate-100 border border-slate-200 rounded-xl text-sm">
+                    <select id="admin-input-unit" class="p-3 bg-slate-100 border border-slate-200 rounded-xl text-sm font-bold">
+                        <option value="1">الوحدة الأولى (أطور ذاتي)</option>
+                        <option value="2">الوحدة الثانية (أنا مسئول)</option>
+                    </select>
+                </div>
+                <textarea id="admin-input-text" rows="4" placeholder="نص الدرس والشرح..." class="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl text-sm"></textarea>
+                <button onclick="saveAdminLesson()" class="w-full py-3 bg-brand-gold text-brand-dark font-black rounded-xl hover:bg-brand-goldlight transition">
+                    حفظ الدرس في الذاكرة التفاعلية
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CERTIFICATE PRINT MODAL -->
+    <div id="certificate-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+        <div id="printable-certificate" class="bg-amber-50 p-8 sm:p-12 rounded-3xl border-8 border-brand-gold max-w-2xl w-full text-center space-y-6 relative shadow-2xl text-slate-800">
+            <button onclick="closeCertificateModal()" class="absolute top-4 left-4 text-slate-400 hover:text-slate-700 text-xl font-bold print:hidden">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            
+            <div class="border-b-2 border-brand-gold pb-4">
+                <h1 class="text-3xl font-black text-brand-dark">شهادة تفوق وتكريم</h1>
+                <p class="text-xs text-brand-goldlight font-bold mt-1">منصة فصيح للغة العربية - الصف السادس الابتدائي</p>
+            </div>
+
+            <p class="text-sm font-medium">تشهد إدارة المنصة بأن الطالب المتميز / الطالبة المتميزة:</p>
+            <h2 id="cert-student-name" class="text-3xl font-black text-brand-emerald underline decoration-brand-gold">البطل الفصيح</h2>
+            <p class="text-sm leading-relaxed max-w-lg mx-auto">
+                قد أتم بنجاح واقتدار دراسة واختبارات الوحدتين الأولى والثانية (أطور ذاتي & أنا مسئول) وحصل على الشارات والتفوق المستحق.
+            </p>
+
+            <div class="flex justify-between items-center pt-8 border-t border-amber-200 text-xs font-bold text-slate-600">
+                <div>
+                    <p>التاريخ: <span id="cert-date">2026/10/30</span></p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 mx-auto bg-brand-dark text-brand-gold rounded-full flex items-center justify-center font-black text-xl mb-1 shadow">
+                        فصيح
+                    </div>
+                    <p class="text-[10px]">ختم المنصة المعتمد</p>
+                </div>
+            </div>
+
+            <button onclick="window.print()" class="w-full py-3 bg-brand-dark text-white font-bold rounded-xl hover:bg-brand-emerald transition print:hidden">
+                <i class="fa-solid fa-print me-2"></i> طباعة الشهادة
+            </button>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-brand-dark text-emerald-200 border-t border-brand-emerald py-8 mt-12 text-center text-xs">
+        <div class="max-w-7xl mx-auto px-4 space-y-3">
+            <p class="font-bold text-sm text-white">منصة "فصيح | FASEEH AI" - المنهج المصري للصف السادس الابتدائي</p>
+            <p>تم تصميم هذا التطبيق بناءً على الكتاب المدرسي المعتمد (الوحدة الأولى ص 7-49 والوحدة الثانية ص 53-79).</p>
+            <p class="text-slate-400">جميع الحقوق محفوظة © 2026</p>
+        </div>
+    </footer>
+
+    <!-- LOGIC & APPLICATION SCRIPT -->
+    <script>
+        /* ==========================================================================
+           1. CURRICULUM DATABASE (TEXTBOOK PAGES 1 TO 79 STRICTLY BASED)
+           ========================================================================== */
+        const DEFAULT_CURRICULUM = {
+            units: [
+                {
+                    id: 1,
+                    title: "الوحدة الأولى: أُطَوِّرُ ذَاتِي",
+                    pages: "ص 7 - ص 49",
+                    lessons: [
+                        {
+                            id: "u1_l1",
+                            title: "الدرس الأول: سمر تطور نفسها (استماع)",
+                            pages: "ص 7 - 8",
+                            type: "استماع",
+                            summary: "تحديد التفاصيل والمعلومات الصريحة والضمنية، الفكرة الرئيسة ونمط النص.",
+                            text: "سمر تلميذة طموحة في الصف السادس الابتدائي، أدركت أن النجاح لا يأتي بالصدفة، بل بالتخطيط المستمر والصبر. قررت سمر أن تطور نفسها في المهارات اللغوية والقرائية من خلال تنظيم وقتها يومياً وتحديد أهداف صغيرة وتحقيقها بثبات.",
+                            grammarNote: "<b>فائدة إملائية:</b> كتابة الهمزة المتوسطة على الألف مثل: (سَأَلَ - رَأْس - مَسْأَلَة) عندما تكون الحركة الأقوى هي الفتحة.",
+                            vocab: [
+                                { word: "تطور", meaning: "تنمي وتحسن", context: "سمر تطور مهاراتها" },
+                                { word: "أهداف", meaning: "غايات ومقاصد", context: "تحديد أهداف صحيحة" },
+                                { word: "تخطيط", meaning: "إعداد وتنظيم مسبق", context: "التخطيط المسبق للوقت" },
+                                { word: "صبر", meaning: "تحمل وثبات", context: "الصبر طريق النجاح" },
+                                { word: "اجتهاد", meaning: "بذل الوسع والطاقة", context: "العمل باجتهاد" }
+                            ],
+                            exercises: [
+                                {
+                                    q: "ما الفكرة الرئيسة لنص استماع سمر؟",
+                                    options: ["اللعب المستمر", "تطوير الذات والتخطيط للأهداف", "النوم المبكر"],
+                                    ans: 1
+                                },
+                                {
+                                    q: "ما الصفة التي تميزت بها سمر لتطوير نفسها؟",
+                                    options: ["التكاسل", "الصبر والتخطيط", "الإهمال"],
+                                    ans: 1
+                                }
+                            ],
+                            quiz: [
+                                { q: "النجاح يتحقق بـ ...", options: ["التخطيط والصبر", "التأجيل", "الحظ فقط"], ans: 0 },
+                                { q: "كلمة (أهداف) تفيد معاني ...", options: ["غايات ومقاصد", "مشاكل", "عواقب"], ans: 0 }
+                            ]
+                        },
+                        {
+                            id: "u1_l2",
+                            title: "الدرس الثاني: كنز لا يقدر بثمن",
+                            pages: "ص 9 - 14",
+                            type: "قراءة",
+                            summary: "نص معلوماتي عن أهمية الوقت وإدارته والتوازن في الحياة.",
+                            text: "الوقت كنز لا يقدر بثمن، وإذا أودعته في مصرف الزمن بحكمة حصلت على أفضل الأرباح. ورد في الدرس أن التوازن بين الدراسة والراحة يمنع التشتت ويجعل الطالب قادراً على الإنجاز.",
+                            grammarNote: "<b>القواعد النحوية:</b> الاسم النكرة والاسم المعرفة.<br>• <b>النكرة:</b> اسم يدل على شيء غير معين (كتاب - معلم - بنك).<br>• <b>المعرفة:</b> اسم يدل على شيء معين (الكتاب - أحمد - مصر).",
+                            vocab: [
+                                { word: "ورد", meaning: "جاء ووصل", context: "ورد في النص" },
+                                { word: "إيداع", meaning: "وضع وحفظ", context: "إيداع المال في المصرف" },
+                                { word: "المصرفي", meaning: "البنكي", context: "العمل المصرفي" },
+                                { word: "دعوني", meaning: "اتركوني", context: "دعوني أفسر لكم" },
+                                { word: "أفسر", meaning: "أوضح وأشرح", context: "أفسر المعنى" },
+                                { word: "التوازن", meaning: "الاعتدال والانسجام", context: "التوازن بين العمل والراحة" },
+                                { word: "التشتت", meaning: "انشغال العقل وعدم التركيز", context: "تجنب التشتت" }
+                            ],
+                            exercises: [
+                                {
+                                    q: "ما المقصود بالكنز الذي لا يقدر بثمن؟",
+                                    options: ["الذهب", "الوقت", "السيارات"],
+                                    ans: 1
+                                },
+                                {
+                                    q: "حدد الاسم المعرفة في الجملة التالية: (قَرَأَ طَالِبٌ الكِتَابَ)",
+                                    options: ["طالب", "الكتاب", "قَرَأَ"],
+                                    ans: 1
+                                }
+                            ],
+                            quiz: [
+                                { q: "مرادف كلمة (أفسر):", options: ["أوضح", "أخفي", "أترك"], ans: 0 },
+                                { q: "كلمة (طالب) تعتبر اسم ...", options: ["معرفة", "نكرة", "فعل"], ans: 1 }
+                            ]
+                        },
+                        {
+                            id: "u1_l3",
+                            title: "الدرس الثالث: اصنع قرارك",
+                            pages: "ص 25 - 28",
+                            type: "قراءة",
+                            summary: "خطوات اتخاذ القرار السليم وتحمل عواقب الاختيارات.",
+                            text: "اتخاذ القرار مهارت تفكير فعالة، ولا نزال نتعلم كيف نزن البدائل المحتملة ونفكر في عواقبها دون اختلاق أعذار. اتخاذ القرار على المدى القريب يؤثر في مستقبلنا.",
+                            grammarNote: "<b>أنواع المعارف (ص 30):</b><br>1. المعرف بـ (ال): المدرسة<br>2. العلم: محمد، مصر<br>3. الضمائر: أنا، أنت، هو<br>4. أسماء الإشارة: هذا، هذه<br>5. الأسماء الموصولة: الذي، التي<br>6. المضاف إلى معرفة: كتابُ المعلمِ.",
+                            vocab: [
+                                { word: "فعالة", meaning: "مؤثرة ومجدية", context: "خطوات فعالة" },
+                                { word: "لا نزال", meaning: "مستمرون", context: "لا نزال نتعلم" },
+                                { word: "المحتملة", meaning: "المتوقعة", context: "النتائج المحتملة" },
+                                { word: "عواقبها", meaning: "نتائجها وآثارها", context: "دراسة عواقب الأمور" },
+                                { word: "أعذار", meaning: "حجج ومبررات", context: "تقديم أعذار" },
+                                { word: "المدى القريب", meaning: "المستقبل القريب", context: "الخطط على المدى القريب" }
+                            ],
+                            exercises: [
+                                {
+                                    q: "أي من التالي يعد من أنواع المعارف؟",
+                                    options: ["الضمائر وأسماء الإشارة", "الفعل الماضي", "حرف الجر"],
+                                    ans: 0
+                                }
+                            ],
+                            quiz: [
+                                { q: "معنى (عواقبها):", options: ["نتائجها", "أسبابها", "بدايتها"], ans: 0 },
+                                { q: "كلمة (مصر) اسم معرفة لأنه:", options: ["علم", "معرف بـ ال", "ضمير"], ans: 0 }
+                            ]
+                        },
+                        {
+                            id: "u1_l4",
+                            title: "الدرس الرابع: نص شعري (إلى الشباب) - إبراهيم ناجي",
+                            pages: "ص 39 - 42",
+                            type: "نص شعري",
+                            summary: "دعوة الشباب للعمل والعلم وبناء الوطن مع استخدام التشبيهات والمحسنات.",
+                            text: "قُلْ لِلَّذِي يَبْغِي الصَّلَاحَ لِقَوْمِهِ --- بِنَبِيلِ صُنْعٍ أَوْ شَرِيفِ جِهَادِ<br>هَذَا زَمَانُكُمْ وَذَا مَيْدَانُكُمْ --- مَاذَا بِكُمْ مِنْ عُدَّةٍ وَعَتَادِ<br>هَذِي دِيَارُكُمْ وَذَلِكَ نِيلُكُمْ --- هِبَةُ السَّمَاءِ وَمِنْحَةُ الْآبَادِ<br>هَذِي دِيَارُكُمْ وَهَذِي شَمْسُكُمْ --- طَمَعُ الْغَرِيبِ وَحُرْقَةُ الْحُسَّادِ<br>فَخُذُوا السَّبِيلَ إِلَى الْحَيَاةِ تَأَلُّفاً --- وَتَكَاتُفاً فِي رَغْبَةٍ وَوِدَادِ<br>خَيْرُ الصَّحَائِفِ مَا كَتَبْتَ سُطُورَهُ --- بِيَدِ الْكِفَاحِ الْحُرِّ لَا بِمِدَادِ",
+                        
+                            vocab: [
+                                { word: "يبغي", meaning: "يطلب ويريد", context: "من يبغي المجد" },
+                                { word: "عتاد", meaning: "ما أُعد للحرب والشدائد", context: "عتاد العلم" },
+                                { word: "هبة", meaning: "عطاء وموهبة بلا مقابل", context: "الوطن هبة الله" },
+                                { word: "الآباد", meaning: "مدى الدهر والأزمنة", context: "على مر الآباد" },
+                                { word: "حرقة", meaning: "شدة الغيظ أو الألم", context: "في حرقة وشوق" },
+                                { word: "السبيل", meaning: "الطريق", context: "سبيل النجاح" },
+                                { word: "تآلفا", meaning: "مودة وتماسكاً", context: "عيشوا تآلفاً" },
+                                { word: "مداد", meaning: "حبر الكتابة", context: "بمداد القلم" }
+                            ],
+                            exercises: [
+                                {
+                                    q: "شاعر نص (إلى الشباب) هو:",
+                                    options: ["إبراهيم ناجي", "أحمد شوقي", "حافظ إبراهيم"],
+                                    ans: 0
+                                }
+                            ],
+                            quiz: [
+                                { q: "مرادف (عتاد):", options: ["ما أعد للحرب والشدائد", "المال الكثير", "الطعام"], ans: 0 },
+                                { q: "معنى (هبة):", options: ["عطاء", "أخذ", "سفر"], ans: 0 }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    id: 2,
+                    title: "الوحدة الثانية: أَنَا مَسْؤُولٌ",
+                    pages: "ص 53 - ص 79",
+                    lessons: [
+                        {
+                            id: "u2_l1",
+                            title: "الدرس الأول: من هم الناجحون؟ (استماع)",
+                            pages: "ص 53 - 54",
+                            type: "استماع",
+                            summary: "مفهوم الشجاعة، اتخاذ القرار، والتحلي بالمسؤولية والتعلم من أخطاء الماضي.",
+                            text: "الناجحون هم الذين يتحملون مسؤولية أفعالهم، ولا يخافون من الفشل، بل يعتبرونه خطوة أولى نحو التعلم. فالشجاعة ليست غياب الخوف، بل القدرة على مواجهته والتغلب عليه.",
+                            grammarNote: "<b>فائدة نحوية:</b> الإعراب يحدد موقع الكلمة في الجملة لتوضيح المعنى.",
+                            vocab: [
+                                { word: "الشجاعة", meaning: "الجرأة ومواجهة الصعاب", context: "الشجاعة أدب ونبل" },
+                                { word: "المسؤولية", meaning: "تحمل نتائج الأعمال", context: "أنا مسؤول عن قراراتي" }
+                            ],
+                            exercises: [
+                                {
+                                    q: "من أهم صفات الناجحين بحسب النص:",
+                                    options: ["الهروب من المشاكل", "التعلم من الأخطاء والشجاعة", "اللوم المستمر للآخرين"],
+                                    ans: 1
+                                }
+                            ],
+                            quiz: [
+                                { q: "الشجاعة تعني:", options: ["الجرأة ومواجهة الصعاب", "التهور بلا تفكير", "الخوف"], ans: 0 }
+                            ]
+                        },
+                        {
+                            id: "u2_l2",
+                            title: "الدرس الثاني: قوة الكلمات",
+                            pages: "ص 55 - 58",
+                            type: "قراءة",
+                            summary: "أثر الكلمات الطيبة والتشجيعية في تغيير حياة الأفراد والمجتمع.",
+                            text: "التف حول الشيخ بضع تلاميذ كي يستمعوا لحكمته. كانت هناك عبارة مدونة في الجدار: 'بادر بالكلمة الطيبة فإنها تبث السكينة في القلوب ولا يمكن محوها من الذاكرة بسهولة'.",
+                            grammarNote: "<b>الأسماء الخمسة (ص 61):</b> (أَبٌ - أَخٌ - حَمٌ - فُو - ذُو).<br>• <b>شروطها:</b> أن تكون مفردة ومضافة لغير ياء المتكلم.<br>• <b>علامات إعرابها:</b><br>- ترفع بالواو (جاءَ **أَبُوكَ**)<br>- تنصب بالألف (رَأَيْتُ **أَباكَ**)<br>- تجر بالياء (سَلَّمْتُ عَلَى **أَبِيكَ**).",
+                            vocab: [
+                                { word: "التف", meaning: "تجمع وحاط به", context: "التف التلاميذ حول المعلم" },
+                                { word: "ترغب في", meaning: "تريد وتحب", context: "ترغب في التعلم" },
+                                { word: "بضع", meaning: "من ثلاثة إلى تسعة", context: "بضع سنوات" },
+                                { word: "مدون", meaning: "مكتوب ومسجل", context: "كلام مدون" },
+                                { word: "بادر", meaning: "أسرع وتقدم", context: "بادر بالخير" },
+                                { word: "السكينة", meaning: "الطمأنينة والهدوء", context: "تبث السكينة" },
+                                { word: "محوها", meaning: "إزالتها وإخفاؤها", context: "محو الآثار" }
+                            ],
+                            exercises: [
+                                {
+                                    q: "إعراب كلمة (أبوك) في: (جَاءَ أَبُوكَ)",
+                                    options: ["فاعل مرفوع بالضمة", "فاعل مرفوع بالواو لأنه من الأسماء الخمسة", "مفعول به منصوب"],
+                                    ans: 1
+                                }
+                            ],
+                            quiz: [
+                                { q: "علامة رفع الأسماء الخمسة هي:", options: ["الواو", "الضمة", "الألف"], ans: 0 },
+                                { q: "معنى (بادر):", options: ["أسرع", "تأخر", "ابتعد"], ans: 0 }
+                            ]
+                        },
+                        {
+                            id: "u2_l3",
+                            title: "الدرس الثالث: سر القوة والنجاح",
+                            pages: "ص 71 - 73",
+                            type: "قراءة",
+                            summary: "بذل الجهد والرعاية والاهتمام بالأهداف للتغلب على الصعوبات.",
+                            text: "ابذل قصارى جهدك، فالنجاح الحقيقي يعكس مدى عنايتك بغاياتك. لا تدع المهام تتراكم حتى لا تصبح التحديات عائقاً، بل ابث الأمل في نفسك لتحقيق ما تصبو إليه.",
+                            grammarNote: "<b>أنواع الخبر (ص 76-78):</b><br>1. <b>مفرد:</b> كلمة واحدة ليست جملة (العلمُ **نُورٌ**).<br>2. <b>جملة اسمية:</b> (الحديقةُ **أَزْهَارُهَا جَمِيلَةٌ**).<br>3. <b>جملة فعلية:</b> (الطالبُ **يَكْتُبُ** الدَّرْسَ).<br>4. <b>شبه جملة:</b> ظرف أو جار ومجرور (العصفورُ **فَوْقَ الشَّجَرَةِ**).",
+                            vocab: [
+                                { word: "ابذل", meaning: "قدم واعطِ", context: "ابذل الجهد" },
+                                { word: "يعكس", meaning: "يدل على ويظهر", context: "يعكس الاهتمام" },
+                                { word: "تتراكم", meaning: "تتجمع وتتزايد", context: "تتراكم الواجبات" },
+                                { word: "عناية", meaning: "رعاية واهتمام", context: "عناية فائقة" },
+                                { word: "تبث", meaning: "تنشر وتنقل", context: "تبث الأمل" },
+                                { word: "غاياتك", meaning: "أهدافك", context: "تحقيق غاياتك" },
+                                { word: "التحديات", meaning: "الصعوبات والعقبات", context: "مواجهة التحديات" }
+                            ],
+                            exercises: [
+                                {
+                                    q: "ما نوع الخبر في الجملة: (الطَّالِبُ يُذَاكِرُ دُرُوسَهُ)؟",
+                                    options: ["خبر مفرد", "خبر جملة فعلية", "خبر شبه جملة"],
+                                    ans: 1
+                                }
+                            ],
+                            quiz: [
+                                { q: "نوع الخبر في (العِلْمُ نُورٌ):", options: ["مفرد", "جملة اسمية", "شبه جملة"], ans: 0 },
+                                { q: "معنى كلمة (تتراكم):", options: ["تتجمع", "تختفي", "تتنظم"], ans: 0 }
+                            ]
+                        },
+                        {
+                            id: "u2_l4",
+                            title: "الدرس الرابع: نص شعري (بناة المجد) - عبد العزيز عتيق",
+                            pages: "ص 87 - 89 (مراجعة تطبيقات ص 79)",
+                            type: "نص شعري",
+                            summary: "الإفادة من أمجاد الأجداد وبناء الحضارات بالسفن والجواري في البحار والأنواء.",
+                            text: "بَنَيْنَا عَلَى أُفُقِ المَجْدِ بَيْتاً ... أَرَسَيْنَا بِهِ العِزَّ نِضَالاً<br>وَمَشَى الجَوَارِي فِي اللُّجَجِ سَابِحَاتٍ ... وَمَا كَانَ مَنَالُ المَجْدِ مَحَالاً.",
+                            grammarNote: "<b>فائدة إملائية:</b> كتابة الهمزة المتوسطة على الياء (النبرة) إذا كانت مكسورة أو ما قبلها مكسور مثل: (بِئْر - سُئِلَ - بِيئَة).",
+                            vocab: [
+                                { word: "نضالاً", meaning: "كفاحاً وجهاداً", context: "نضالاً مستمراً" },
+                                { word: "رواسي", meaning: "جبال ثابتة", context: "كالرواسي" },
+                                { word: "أرسينا", meaning: "ثبتنا وأقمنا", context: "أرسينا القواعد" },
+                                { word: "الجواري", meaning: "السفن التي تجري في البحر", context: "الجواري المنشآت" },
+                                { word: "لجته", meaning: "مائه الكثير وموجه", context: "لجة البحر" },
+                                { word: "سابحات", meaning: "مبحرات أو طائرات/مركبات", context: "سفن سابحات" },
+                                { word: "مناله", meaning: "الحصول عليه والوصول إليه", context: "سهل المنال" },
+                                { word: "محالاً", meaning: "مستحيلاً", context: "ليس محالاً" }
+                            ],
+                            exercises: [
+                                {
+                                    q: "الشاعر مؤلف قصيدة (بناة المجد) هو:",
+                                    options: ["عبد العزيز عتيق", "إبراهيم ناجي", "أحمد شوقي"],
+                                    ans: 0
+                                }
+                            ],
+                            quiz: [
+                                { q: "المقصود بـ (الجواري) في النص:", options: ["السفن", "النساء", "الخيول"], ans: 0 },
+                                { q: "معنى (محالاً):", options: ["مستحيلاً", "ممكناً", "سهلاً"], ans: 0 }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+
+        /* ==========================================================================
+           2. GLOBAL STATE APP VARIABLES
+           ========================================================================== */
+        let state = {
+            curriculum: null,
+            currentSection: 'home',
+            activeUnitId: 1,
+            activeLesson: null,
+            activeStage: 1,
+            userXP: 0,
+            completedLessons: [],
+            badges: [
+                { id: 'b1', title: 'بطل القراءة', icon: '📖', desc: 'إتمام أول درس قراءة', earned: false },
+                { id: 'b2', title: 'خبير النحو', icon: '⚖️', desc: 'حل تمارين النحو بنجاح', earned: false },
+                { id: 'b3', title: 'ملك المفردات', icon: '🧠', desc: 'حفظ بطاقات معاني الكلمات', earned: false },
+                { id: 'b4', title: 'بطل الإملاء', icon: '✍️', desc: 'إتقان قواعد الهمزة المتوسطة', earned: false },
+                { id: 'b5', title: 'متفوق الوحدة 1', icon: '🥇', desc: 'اجتياز اختبار الوحدة الأولى', earned: false },
+                { id: 'b6', title: 'متفوق الوحدة 2', icon: '👑', desc: 'اجتياز اختبار الوحدة الثانية', earned: false }
+            ],
+            chatHistory: [],
+            isAudioPlaying: false,
+            speechSynth: window.speechSynthesis || null
+        };
+
+        /* ==========================================================================
+           3. INITIALIZATION & STORAGE SYSTEM
+           ========================================================================== */
+        window.onload = function () {
+            loadStateFromStorage();
+            renderLessonsList(1);
+            updateUserXP(0);
+            renderDashboardBadges();
+            initGrammarSection();
+            
+            // Check speech support
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                console.log('Voice recognition not available natively.');
+            }
+        };
+
+        function loadStateFromStorage() {
+            const savedData = localStorage.getItem('faseeh_curriculum_data');
+            if (savedData) {
+                try {
+                    state.curriculum = JSON.parse(savedData);
+                } catch(e) {
+                    state.curriculum = DEFAULT_CURRICULUM;
+                }
+            } else {
+                state.curriculum = DEFAULT_CURRICULUM;
+            }
+
+            const savedXP = localStorage.getItem('faseeh_user_xp');
+            if (savedXP) state.userXP = parseInt(savedXP);
+
+            const savedCompleted = localStorage.getItem('faseeh_completed_lessons');
+            if (savedCompleted) state.completedLessons = JSON.parse(savedCompleted);
+        }
+
+        function saveStateToStorage() {
+            localStorage.setItem('faseeh_curriculum_data', JSON.stringify(state.curriculum));
+            localStorage.setItem('faseeh_user_xp', state.userXP.toString());
+            localStorage.setItem('faseeh_completed_lessons', JSON.stringify(state.completedLessons));
+        }
+
+        /* ==========================================================================
+           4. NAVIGATION SYSTEM
+           ========================================================================== */
+        function navigateTo(sectionId) {
+            // Stop any ongoing speech narrative
+            if (state.speechSynth && state.isAudioPlaying) {
+                state.speechSynth.cancel();
+                state.isAudioPlaying = false;
+                const wave = document.getElementById('tts-wave-container');
+                if (wave) wave.classList.add('hidden');
+            }
+
+            state.currentSection = sectionId;
+            const sections = ['home', 'units', 'lesson-viewer', 'grammar', 'teacher', 'games', 'exams', 'dashboard'];
+            sections.forEach(s => {
+                const el = document.getElementById(`section-${s}`);
+                if (el) el.classList.add('hidden');
+            });
+
+            const target = document.getElementById(`section-${sectionId}`);
+            if (target) target.classList.remove('hidden');
+
+            // Scroll top smooth
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function openUnitLessons(unitId) {
+            state.activeUnitId = unitId;
+            switchUnitTab(unitId);
+            navigateTo('units');
+        }
+
+        function switchUnitTab(unitId) {
+            state.activeUnitId = unitId;
+            const btn1 = document.getElementById('unit-tab-1');
+            const btn2 = document.getElementById('unit-tab-2');
+
+            if (unitId === 1) {
+                btn1.className = "px-5 py-2.5 rounded-xl font-bold text-sm transition bg-white text-brand-emerald shadow-sm";
+                btn2.className = "px-5 py-2.5 rounded-xl font-bold text-sm transition text-slate-600 hover:text-brand-dark";
+            } else {
+                btn2.className = "px-5 py-2.5 rounded-xl font-bold text-sm transition bg-white text-brand-goldlight shadow-sm";
+                btn1.className = "px-5 py-2.5 rounded-xl font-bold text-sm transition text-slate-600 hover:text-brand-dark";
+            }
+
+            renderLessonsList(unitId);
+        }
+
+        /* ==========================================================================
+           5. LESSONS RENDERER & STAGE SYSTEM
+           ========================================================================== */
+        function renderLessonsList(unitId) {
+            const container = document.getElementById('lessons-grid-container');
+            container.innerHTML = '';
+
+            const unit = state.curriculum.units.find(u => u.id === unitId);
+            if (!unit) return;
+
+            unit.lessons.forEach(lesson => {
+                const isDone = state.completedLessons.includes(lesson.id);
+                const card = document.createElement('div');
+                card.className = "bg-white p-6 rounded-3xl border border-slate-200 shadow-md hover:shadow-xl transition flex flex-col justify-between space-y-4 relative";
+                
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-extrabold px-3 py-1 rounded-full ${lesson.type === 'شعر' ? 'bg-purple-100 text-purple-700' : 'bg-emerald-100 text-brand-emerald'}">
+                                ${lesson.type}
+                            </span>
+                            <span class="text-xs text-slate-400 font-bold">${lesson.pages}</span>
+                        </div>
+                        <h3 class="text-xl font-black text-brand-dark mb-2">${lesson.title}</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">${lesson.summary}</p>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+                        ${isDone ? '<span class="text-xs font-bold text-emerald-600 flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> مكتمل</span>' : '<span class="text-xs text-slate-400">غير مكتمل</span>'}
+                        <button onclick="openLessonViewer('${lesson.id}')" class="px-5 py-2.5 gold-gradient text-brand-dark font-black rounded-xl text-xs hover:shadow-md transition">
+                            ابدأ الدرس الآن <i class="fa-solid fa-arrow-left ms-1"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function openLessonViewer(lessonId) {
+            let foundLesson = null;
+            state.curriculum.units.forEach(u => {
+                const l = u.lessons.find(item => item.id === lessonId);
+                if (l) foundLesson = l;
+            });
+
+            if (!foundLesson) return;
+
+            state.activeLesson = foundLesson;
+            document.getElementById('viewer-lesson-title').innerText = foundLesson.title;
+            document.getElementById('viewer-lesson-meta').innerText = `${foundLesson.pages} • المنهج المدرسي الرسمي`;
+
+            // Load Stage 1
+            document.getElementById('lesson-text-body').innerHTML = `<p>${foundLesson.text}</p>`;
+            document.getElementById('lesson-grammar-box').innerHTML = foundLesson.grammarNote || 'لا توجد ملاحظات إضافية لهذا الدرس.';
+
+            // Load Stage 2 (Vocab)
+            renderFlashcards(foundLesson.vocab);
+
+            // Load Stage 3 (Exercises)
+            renderExercises(foundLesson.exercises);
+
+            // Load Stage 4 (Quiz)
+            renderLessonQuiz(foundLesson.quiz);
+
+            switchStage(1);
+            navigateTo('lesson-viewer');
+        }
+
+        function switchStage(stageNum) {
+            state.activeStage = stageNum;
+            for (let i = 1; i <= 4; i++) {
+                const tab = document.getElementById(`stage-btn-${i}`);
+                const content = document.getElementById(`stage-content-${i}`);
+                if (i === stageNum) {
+                    tab.className = "stage-tab px-4 py-2 rounded-xl text-xs font-bold transition border flex items-center gap-2 bg-brand-emerald text-white border-brand-emerald";
+                    content.classList.remove('hidden');
+                } else {
+                    tab.className = "stage-tab px-4 py-2 rounded-xl text-xs font-bold transition border flex items-center gap-2 bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200";
+                    content.classList.add('hidden');
+                }
+            }
+        }
+
+        /* ==========================================================================
+           6. AUDIO TEXT-TO-SPEECH (TTS) NARRATOR
+           ========================================================================== */
+        function toggleAudioNarrative() {
+            if (!state.speechSynth) {
+                alert('عذراً، خاصية القراءة الصوتية غير مدعومة في متصفحك بشكل مباشر.');
+                return;
+            }
+
+            const icon = document.getElementById('tts-icon');
+            const wave = document.getElementById('tts-wave-container');
+
+            if (state.isAudioPlaying) {
+                state.speechSynth.cancel();
+                state.isAudioPlaying = false;
+                icon.className = "fa-solid fa-play";
+                wave.classList.add('hidden');
+            } else {
+                const cleanText = state.activeLesson.text.replace(/<[^>]*>?/gm, '');
+                const utterance = new SpeechSynthesisUtterance(cleanText);
+                utterance.lang = 'ar-SA';
+                utterance.rate = 0.9;
+
+                utterance.onend = function () {
+                    state.isAudioPlaying = false;
+                    icon.className = "fa-solid fa-play";
+                    wave.classList.add('hidden');
+                };
+
+                state.speechSynth.speak(utterance);
+                state.isAudioPlaying = true;
+                icon.className = "fa-solid fa-pause";
+                wave.classList.remove('hidden');
+            }
+        }
+
+        /* ==========================================================================
+           7. VOCABULARY FLASHCARDS (STAGE 2)
+           ========================================================================== */
+        function renderFlashcards(vocabList) {
+            const grid = document.getElementById('vocab-cards-grid');
+            grid.innerHTML = '';
+
+            if (!vocabList || vocabList.length === 0) {
+                grid.innerHTML = '<p class="text-center text-slate-400 col-span-3">لا توجد مفردات خاصة بهذا الدرس.</p>';
+                return;
+            }
+
+            vocabList.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = "flip-card h-48 cursor-pointer";
+                card.onclick = function () {
+                    this.classList.toggle('flipped');
+                    addXP(5);
+                    checkBadgeEarned('b3');
+                };
+
+                card.innerHTML = `
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front bg-white p-6 border-2 border-slate-200 shadow-md flex flex-col justify-between items-center text-center">
+                            <span class="text-xs text-brand-gold font-bold">كلمة رقم ${index + 1}</span>
+                            <h4 class="text-2xl font-black text-brand-dark">${item.word}</h4>
+                            <span class="text-[10px] text-slate-400">انقر كروت العرض للقلب</span>
+                        </div>
+                        <div class="flip-card-back emerald-gradient text-white p-6 shadow-xl flex flex-col justify-between items-center text-center">
+                            <span class="text-xs text-emerald-200">المعنى المدرسي</span>
+                            <h4 class="text-xl font-bold text-brand-gold">${item.meaning}</h4>
+                            <p class="text-xs text-emerald-100 italic">السياق: "${item.context}"</p>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        /* ==========================================================================
+           8. EXERCISES & QUIZ SYSTEM (STAGES 3 & 4)
+           ========================================================================== */
+        function renderExercises(exercises) {
+            const container = document.getElementById('exercises-list-container');
+            container.innerHTML = '';
+
+            if (!exercises || exercises.length === 0) {
+                container.innerHTML = '<p class="text-slate-400 text-center">لا توجد تمارين تفاعلية لهذا الدرس حالياً.</p>';
+                return;
+            }
+
+            exercises.forEach((ex, idx) => {
+                const div = document.createElement('div');
+                div.className = "p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-3";
+                div.innerHTML = `
+                    <p class="font-bold text-brand-dark text-sm">س${idx + 1}: ${ex.q}</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        ${ex.options.map((opt, oIdx) => `
+                            <button onclick="checkExerciseAnswer(this, ${oIdx}, ${ex.ans})" class="p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition text-right">
+                                ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function checkExerciseAnswer(btn, chosen, correct) {
+            const parent = btn.parentElement;
+            const buttons = parent.querySelectorAll('button');
+            buttons.forEach(b => b.disabled = true);
+
+            if (chosen === correct) {
+                btn.className = "p-3 bg-emerald-500 text-white border border-emerald-600 rounded-xl text-xs font-bold text-right";
+                addXP(10);
+            } else {
+                btn.className = "p-3 bg-red-500 text-white border border-red-600 rounded-xl text-xs font-bold text-right";
+                buttons[correct].className = "p-3 bg-emerald-500 text-white border border-emerald-600 rounded-xl text-xs font-bold text-right";
+            }
+        }
+
+        function renderLessonQuiz(quiz) {
+            const container = document.getElementById('quiz-questions-container');
+            container.innerHTML = '';
+
+            if (!quiz || quiz.length === 0) {
+                container.innerHTML = '<p class="text-slate-400 text-center">لا يوجد اختبار حالي للدرس.</p>';
+                return;
+            }
+
+            quiz.forEach((q, qIdx) => {
+                const div = document.createElement('div');
+                div.className = "p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3";
+                div.innerHTML = `
+                    <p class="font-bold text-brand-dark text-sm">السؤال ${qIdx + 1}: ${q.q}</p>
+                    <div class="space-y-2">
+                        ${q.options.map((opt, oIdx) => `
+                            <label class="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-100">
+                                <input type="radio" name="quiz_q_${qIdx}" value="${oIdx}" class="text-brand-emerald focus:ring-brand-emerald" required>
+                                <span class="text-xs font-bold text-slate-700">${opt}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            document.getElementById('quiz-result-box').classList.add('hidden');
+        }
+
+        function submitLessonQuiz(e) {
+            e.preventDefault();
+            const quiz = state.activeLesson.quiz;
+            let score = 0;
+
+            quiz.forEach((q, qIdx) => {
+                const selected = document.querySelector(`input[name="quiz_q_${qIdx}"]:checked`);
+                if (selected && parseInt(selected.value) === q.ans) {
+                    score += (100 / quiz.length);
+                }
+            });
+
+            const resBox = document.getElementById('quiz-result-box');
+            resBox.classList.remove('hidden');
+
+            if (score >= 50) {
+                resBox.className = "mt-8 p-6 rounded-2xl text-center border-2 bg-emerald-50 border-emerald-300 text-emerald-900 space-y-2";
+                resBox.innerHTML = `
+                    <h4 class="text-2xl font-black text-emerald-700">مبارك! نتيجتك: ${Math.round(score)}% 🎉</h4>
+                    <p class="text-xs">لقد نجحت في اختبار الدرس واكتسبت نقاط خبرة جديدة!</p>
+                `;
+                addXP(50);
+                if (!state.completedLessons.includes(state.activeLesson.id)) {
+                    state.completedLessons.push(state.activeLesson.id);
+                    saveStateToStorage();
+                }
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            } else {
+                resBox.className = "mt-8 p-6 rounded-2xl text-center border-2 bg-red-50 border-red-300 text-red-900 space-y-2";
+                resBox.innerHTML = `
+                    <h4 class="text-2xl font-black text-red-700">حاول مرة أخرى! نتيجتك: ${Math.round(score)}%</h4>
+                    <p class="text-xs">راجع الشرح والمفردات ثم أعد الاختبار للحصول على النقاط.</p>
+                `;
+            }
+        }
+
+        /* ==========================================================================
+           9. GRAMMAR WORLD IMPLEMENTATION
+           ========================================================================== */
+        const GRAMMAR_DATA = {
+            nakira: {
+                title: "النكرة والمعرفة (ص 15-16)",
+                rule: "• <b>النكرة:</b> اسم يدل على شيء غير معين (كتاب - معلم - مدرسة).<br>• <b>المعرفة:</b> اسم يدل على شيء معين ومعروف (الكتاب - المعلم - القاهرة).",
+                examples: [
+                    { text: "قَرَأَ طَالِبٌ كِتَاباً", note: "(طالب - كتاباً) أسماء نكرة لأنها غامضة وغير محددة." },
+                    { text: "قَرَأَ الطَّالِبُ الكِتَابَ", note: "(الطالب - الكتاب) أسماء معرفة لدخول (ال) التعريف عليهما." }
+                ],
+                sentence: "زَارَ السَّائِحُ مَصْنَعاً",
+                words: [
+                    { word: "زَارَ", pos: "فعل ماضٍ مبني على الفتح" },
+                    { word: "السَّائِحُ", pos: "فاعل مرفوع وعلامة رفعه الضمة (معرفة)" },
+                    { word: "مَصْنَعاً", pos: "مفعول به منصوب وعلامة نصبه الفتحة (نكرة)" }
+                ]
+            },
+            types_marifa: {
+                title: "أنواع المعارف السائتة (ص 30-31)",
+                rule: "تنقسم المعارف إلى:<br>1. المعرف بـ (ال): المدرسة<br>2. العلم: محمد - مصر - مكة<br>3. الضمائر: (أنا - أنت - هو - هما)<br>4. أسماء الإشارة: (هذا - هذه - هؤلاء)<br>5. الأسماء الموصولة: (الذي - التي - الذين)<br>6. المضاف إلى معرفة: (كتابُ الطالبِ).",
+                examples: [
+                    { text: "أَنْتَ طَالِبٌ مُجْتَهِدٌ", note: "(أنت) ضمير مخاطب معرفة." }
+                ],
+                sentence: "هَذَا هُوَ المَعْلَمُ الَّذِي بَنَاهُ المِصْرِيُّ",
+                words: [
+                    { word: "هَذَا", pos: "اسم إشارة (معرفة)" },
+                    { word: "هُوَ", pos: "ضمير غائب (معرفة)" },
+                    { word: "المَعْلَمُ", pos: "معرف بـ ال (معرفة)" }
+                ]
+            },
+            asmaa_khamsa: {
+                title: "الأسماء الخمسة (ص 61-62)",
+                rule: "الأسماء الخمسة هي: (أَبٌ - أَخٌ - حَمٌ - فُو - ذُو)<br>• <b>علامات إعرابها:</b><br>- تُرفع بالواو: (حَضَرَ أَبُوكَ)<br>- تُنصب بالألف: (رَأَيْتُ أَبَاكَ)<br>- تُجر بالياء: (سَلَّمْتُ عَلَى أَبِيكَ)",
+                examples: [
+                    { text: "أَبُوكَ ذُو خُلُقٍ حَسَنٍ", note: "(أبوك) مبتدأ مرفوع بالواو، (ذو) خبر مرفوع بالواو." }
+                ],
+                sentence: "شَاهَدْتُ أَبَاكَ فِي المَسْجِدِ",
+                words: [
+                    { word: "شَاهَدْتُ", pos: "فعل ماض والتاء ضمير متصل فاعل" },
+                    { word: "أَبَاكَ", pos: "مفعول به منصوب بالألف لأنه من الأسماء الخمسة" }
+                ]
+            },
+            khabar_types: {
+                title: "أنواع الخبر (ص 76-78)",
+                rule: "1. <b>مفرد:</b> ليس جملة ولا شبه جملة (العلمُ **نُورٌ**).<br>2. <b>جملة اسمية:</b> (المدرسةُ **أَسْوَارُهَا عَالِيَةٌ**).<br>3. <b>جملة فعلية:</b> (الولدُ **يَلْعَبُ**).<br>4. <b>شبه جملة:</b> ظرف أو جار ومجرور (المعلمُ **فِي الفَصْلِ**).",
+                examples: [
+                    { text: "الطَّائِرُ فَوْقَ الشَّجَرَةِ", note: "الخبر (فوق) شبه جملة ظرف مكان." }
+                ],
+                sentence: "المُعَلِّمُ يَشْرَحُ الدَّرْسَ",
+                words: [
+                    { word: "المُعَلِّمُ", pos: "مبتدأ مرفوع وعلامة رفعه الضمة" },
+                    { word: "يَشْرَحُ الدَّرْسَ", pos: "جملة فعلية في محل رفع خبر المبتدأ" }
+                ]
+            },
+            spelling_hamza: {
+                title: "الهمزة المتوسطة (ص 17، 63، 79)",
+                rule: "ترسم الهمزة المتوسطة بحسب الحركة الأقوى:<br>• <b>الكسرة</b> (تناسبها الياء/النبرة): مَئِذَنَة - بِئْر.<br>• <b>الضمة</b> (تناسبها الواو): مُؤْمِن.<br>• <b>الفتحة</b> (تناسبها الألف): سَأَلَ - مَسْأَلَة.",
+                examples: [
+                    { text: "سَأَلَ المَعْلَمُ التِّلْمِيذَ", note: "همزة مفتوحة ما قبلها مفتوح فترسم على الألف." }
+                ],
+                sentence: "سُئِلَ الطَّالِبُ عَنِ المَسْأَلَةِ",
+                words: [
+                    { word: "سُئِلَ", pos: "همزة متوسطة على الياء لأنها مكسورة" },
+                    { word: "المَسْأَلَةِ", pos: "همزة متوسطة على الألف لأنها مفتوحة بعد ساكن" }
+                ]
+            }
+        };
+
+        function initGrammarSection() {
+            loadGrammarDetail('nakira');
+        }
+
+        function loadGrammarDetail(key) {
+            const item = GRAMMAR_DATA[key];
+            if (!item) return;
+
+            // Highlight Tab
+            document.querySelectorAll('.g-tab-btn').forEach(b => {
+                b.className = "g-tab-btn w-full text-right p-4 rounded-2xl bg-white border border-slate-200 text-slate-700 font-bold hover:bg-slate-50 transition flex items-center justify-between";
+            });
+            const activeBtn = document.getElementById(`gtab-${key}`);
+            if (activeBtn) activeBtn.className = "g-tab-btn w-full text-right p-4 rounded-2xl bg-white border-2 border-brand-emerald text-brand-dark font-bold shadow-sm flex items-center justify-between transition";
+
+            const container = document.getElementById('grammar-detail-container');
+            container.innerHTML = `
+                <h3 class="text-2xl font-black text-brand-dark">${item.title}</h3>
+                <div class="p-5 bg-emerald-50/60 rounded-2xl border border-emerald-200 text-emerald-950 text-sm leading-loose">
+                    ${item.rule}
+                </div>
+                <div class="space-y-3">
+                    <h4 class="font-bold text-slate-800 text-sm">أمثلة الشرح:</h4>
+                    ${item.examples.map(ex => `
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-sm">
+                            <p class="font-black text-brand-emerald text-base">${ex.text}</p>
+                            <p class="text-xs text-slate-500 mt-1">${ex.note}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            // Interactive Parsing Box
+            const parseBox = document.getElementById('interactive-parsing-box');
+            parseBox.innerHTML = `
+                <p class="text-xs text-slate-500 mb-2 font-bold">جملة نموذجية للإعراب: <span class="text-brand-dark text-sm font-black">${item.sentence}</span></p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    ${item.words.map(w => `
+                        <div class="p-3 bg-white rounded-xl border border-slate-200 text-center">
+                            <span class="font-black text-brand-emerald block text-base">${w.word}</span>
+                            <span class="text-[11px] text-slate-600 font-bold mt-1 block">${w.pos}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        /* ==========================================================================
+           10. AI TEACHER CHAT SIMULATOR ("المعلم فصيح")
+           ========================================================================== */
+/* ==========================================================================
+   10. FASEEH AI - REAL AI TEACHER
+   ========================================================================== */
+
+const FASEEH_CHAT_KEY = "faseeh_ai_chat_history_v1";
+let faseehMessages = [];
+
+function loadFaseehHistory() {
+    try {
+        const saved = JSON.parse(localStorage.getItem(FASEEH_CHAT_KEY) || "[]");
+        faseehMessages = Array.isArray(saved) ? saved : [];
+    } catch {
+        faseehMessages = [];
+    }
+}
+
+function saveFaseehHistory() {
+    localStorage.setItem(
+        FASEEH_CHAT_KEY,
+        JSON.stringify(faseehMessages.slice(-20))
+    );
+}
+
+function appendChatMessage(sender, message) {
+    const container = document.getElementById("chat-messages");
+    const div = document.createElement("div");
+
+    if (sender === "user") {
+        div.className = "flex gap-3 max-w-xl me-auto flex-row-reverse";
+
+        const avatar = document.createElement("div");
+        avatar.className = "w-9 h-9 rounded-xl bg-brand-gold text-brand-dark flex-shrink-0 flex items-center justify-center font-bold";
+        avatar.textContent = "أنت";
+
+        const bubble = document.createElement("div");
+        bubble.className = "bg-brand-emerald text-white p-4 rounded-2xl rounded-tl-none text-sm shadow-sm whitespace-pre-wrap";
+        bubble.textContent = message;
+
+        div.append(avatar, bubble);
+    } else {
+        div.className = "flex gap-3 max-w-xl";
+
+        const avatar = document.createElement("div");
+        avatar.className = "w-9 h-9 rounded-xl bg-brand-emerald text-brand-gold flex-shrink-0 flex items-center justify-center font-bold";
+        avatar.textContent = "ف";
+
+        const bubble = document.createElement("div");
+        bubble.className = "bg-white p-4 rounded-2xl rounded-tr-none border border-slate-200 text-slate-800 text-sm shadow-sm space-y-2 whitespace-pre-wrap";
+        bubble.textContent = message;
+
+        div.append(avatar, bubble);
+    }
+
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+
+    return div;
+}
+
+async function sendFaseehMessage() {
+    const input = document.getElementById("chat-user-input");
+    const sendButton = input?.form?.querySelector('button[type="submit"]');
+
+    if (!input) return;
+
+    const message = input.value.trim();
+    if (!message) return;
+
+    appendChatMessage("user", message);
+    faseehMessages.push({ role: "user", content: message });
+    saveFaseehHistory();
+
+    input.value = "";
+    input.disabled = true;
+    if (sendButton) sendButton.disabled = true;
+
+    const loadingMessage = appendChatMessage("ai", "فصيح يفكر في إجابتك...");
+
+    try {
+        const lesson = (typeof state !== "undefined" && state.activeLesson)
+            ? {
+                title: state.activeLesson.title || "",
+                text: state.activeLesson.text || "",
+                grammarNote: state.activeLesson.grammarNote || ""
+            }
+            : null;
+
+        const response = await fetch("/api/chat", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                messages: faseehMessages.slice(-12),
+                lessonContext: lesson
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "حدث خطأ أثناء الاتصال بالمعلم فصيح.");
+        }
+
+        const reply = data.reply || "لم أتمكن من تكوين إجابة. حاول مرة أخرى.";
+
+        loadingMessage.remove();
+        appendChatMessage("ai", reply);
+
+        faseehMessages.push({ role: "assistant", content: reply });
+        saveFaseehHistory();
+
+    } catch (error) {
+        loadingMessage.remove();
+        appendChatMessage(
+            "ai",
+            "عذراً، لم أستطع الاتصال الآن. تأكد من اتصال الإنترنت وحاول مرة أخرى.\n\n" +
+            (error.message || "")
+        );
+    } finally {
+        input.disabled = false;
+        if (sendButton) sendButton.disabled = false;
+        input.focus();
+    }
+}
+
+function handleUserChatSubmit(event) {
+    event.preventDefault();
+    sendFaseehMessage();
+}
+
+function quickAsk(text) {
+    const input = document.getElementById("chat-user-input");
+    if (!input) return;
+
+    input.value = text;
+    sendFaseehMessage();
+}
+
+function clearChatHistory() {
+    faseehMessages = [];
+    localStorage.removeItem(FASEEH_CHAT_KEY);
+
+    const container = document.getElementById("chat-messages");
+    container.innerHTML = `
+        <div class="flex gap-3 max-w-xl">
+            <div class="w-9 h-9 rounded-xl bg-brand-emerald text-brand-gold flex-shrink-0 flex items-center justify-center font-bold">ف</div>
+            <div class="bg-white p-4 rounded-2xl rounded-tr-none border border-slate-200 text-slate-800 text-sm shadow-sm space-y-2">
+                <p class="font-bold text-brand-emerald">تمت إعادة تهيئة المحادثة! كيف أساعدك الآن؟</p>
+            </div>
+        </div>
+    `;
+}
+
+function restoreFaseehHistory() {
+    loadFaseehHistory();
+
+    const container = document.getElementById("chat-messages");
+    if (!container || faseehMessages.length === 0) return;
+
+    container.innerHTML = "";
+
+    faseehMessages.forEach(item => {
+        appendChatMessage(
+            item.role === "user" ? "user" : "ai",
+            item.content
+        );
+    });
+}
+
+// Restore saved conversation when the page loads.
+restoreFaseehHistory();
+        function toggleVoiceInput() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert('التعرف على الصوت غير مدعوم في متصفحك. يمكنك الكتابة مباشرة.');
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'ar-EG';
+
+            const btn = document.getElementById('voice-input-btn');
+            btn.classList.add('text-red-500', 'animate-pulse');
+
+            recognition.onresult = function(event) {
+                const text = event.results[0][0].transcript;
+                document.getElementById('chat-user-input').value = text;
+                btn.classList.remove('text-red-500', 'animate-pulse');
+            };
+
+            recognition.onerror = function() {
+                btn.classList.remove('text-red-500', 'animate-pulse');
+            };
+
+            recognition.start();
+        }
+
+        function clearChatHistory() {
+            const container = document.getElementById('chat-messages');
+            container.innerHTML = `
+                <div class="flex gap-3 max-w-xl">
+                    <div class="w-9 h-9 rounded-xl bg-brand-emerald text-brand-gold flex-shrink-0 flex items-center justify-center font-bold">ف</div>
+                    <div class="bg-white p-4 rounded-2xl rounded-tr-none border border-slate-200 text-slate-800 text-sm shadow-sm space-y-2">
+                        <p class="font-bold text-brand-emerald">تمت إعادة تهيئة المحادثة! كيف أساعدك الآن؟</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        /* ==========================================================================
+           11. EDUCATIONAL GAMES HUB
+           ========================================================================== */
+        function launchGame(gameType) {
+            const arena = document.getElementById('game-arena');
+            arena.classList.remove('hidden');
+
+            if (gameType === 'grammar') {
+                arena.innerHTML = `
+                    <div class="flex justify-between items-center border-b pb-4">
+                        <h3 class="text-2xl font-black text-brand-dark">تحدي فرسان النحو (نكرة أم معرفة؟)</h3>
+                        <button onclick="document.getElementById('game-arena').classList.add('hidden')" class="text-xs bg-slate-200 px-3 py-1 rounded-lg">إغلاق</button>
+                    </div>
+                    <div class="text-center py-8 space-y-6">
+                        <span class="text-xs font-bold text-slate-400">صنف الكلمة التالية:</span>
+                        <h2 id="g-word-display" class="text-4xl font-black text-brand-emerald">القَاهِرَةُ</h2>
+                        <div class="flex justify-center gap-4">
+                            <button onclick="playGrammarGameChoice('nakira')" class="px-8 py-4 bg-amber-100 text-amber-900 border border-amber-300 font-bold rounded-2xl hover:scale-105 transition">
+                                📦 اسم نكرة
+                            </button>
+                            <button onclick="playGrammarGameChoice('marifa')" class="px-8 py-4 bg-emerald-100 text-brand-emerald border border-emerald-300 font-bold rounded-2xl hover:scale-105 transition">
+                                ✨ اسم معرفة
+                            </button>
+                        </div>
+                        <p id="g-feedback" class="text-sm font-bold h-6"></p>
+                    </div>
+                `;
+            } else {
+                arena.innerHTML = `
+                    <div class="text-center py-6 space-y-4">
+                        <h3 class="text-2xl font-black text-brand-dark">اللعبة جاهزة الان!</h3>
+                        <p class="text-xs text-slate-500">تم اختيار نموذج التحدي من حصيلة المنهج الدراسي.</p>
+                        <button onclick="addXP(30); checkBadgeEarned('b2'); alert('أحسنت! أتممت التحدي واكتسبت 30 XP'); document.getElementById('game-arena').classList.add('hidden')" class="px-6 py-3 gold-gradient font-black rounded-xl text-brand-dark">
+                            إكمال التحدي والحصول على النقاط
+                        </button>
+                    </div>
+                `;
+            }
+
+            arena.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        let currentGameWordIndex = 0;
+        const GRAMMAR_GAME_WORDS = [
+            { word: "القَاهِرَةُ", type: "marifa" },
+            { word: "كِتَابٌ", type: "nakira" },
+            { word: "أَحْمَدُ", type: "marifa" },
+            { word: "مَدْرَسَةٌ", type: "nakira" },
+            { word: "الَّذِي", type: "marifa" }
+        ];
+
+        function playGrammarGameChoice(choice) {
+            const current = GRAMMAR_GAME_WORDS[currentGameWordIndex];
+            const feedback = document.getElementById('g-feedback');
+
+            if (choice === current.type) {
+                feedback.className = "text-sm font-bold text-emerald-600";
+                feedback.innerText = "إجابة صحيحة! أحسنت 👏 (+10 XP)";
+                addXP(10);
+            } else {
+                feedback.className = "text-sm font-bold text-red-600";
+                feedback.innerText = "إجابة خاطئة! حاول مرة أخرى ❌";
+            }
+
+            currentGameWordIndex = (currentGameWordIndex + 1) % GRAMMAR_GAME_WORDS.length;
+            setTimeout(() => {
+                const wordEl = document.getElementById('g-word-display');
+                if (wordEl) {
+                    wordEl.innerText = GRAMMAR_GAME_WORDS[currentGameWordIndex].word;
+                    feedback.innerText = "";
+                }
+            }, 1000);
+        }
+
+        /* ==========================================================================
+           12. EXAMINATIONS HUB ENGINE
+           ========================================================================== */
+        function startComprehensiveExam(examType) {
+            const container = document.getElementById('exam-engine-container');
+            container.classList.remove('hidden');
+
+            let title = "";
+            let questions = [];
+
+            if (examType === 1) {
+                title = "اختبار الوحدة الأولى: أطور ذاتي";
+                questions = [
+                    { q: "المقصود بالكنز الذي لا يقدر بثمن في الدرس الثاني:", options: ["الوقت", "الذهب", "المال"], ans: 0 },
+                    { q: "شاعر قصيدة (إلى الشباب) هو الشاعر:", options: ["إبراهيم ناجي", "عبد العزيز عتيق", "أحمد شوقي"], ans: 0 },
+                    { q: "تكتب الهمزة المتوسطة في كلمة (سَأَلَ) على الألف لأنها:", options: ["مفتوحة بعد فتح", "مكسورة", "مضمومة"], ans: 0 },
+                    { q: "كلمة (مصر) تعتبر اسماً:", options: ["معرفة لأنه علم", "نكرة", "فعل ماض"], ans: 0 }
+                ];
+            } else if (examType === 2) {
+                title = "اختبار الوحدة الثانية: أنا مسئول";
+                questions = [
+                    { q: "تُرفع الأسماء الخمسة وعلامة رفعها هي:", options: ["الواو", "الألف", "الضمة"], ans: 0 },
+                    { q: "نوع الخبر في جملة (العِلْمُ يَرْفَعُ البَيْتَ):", options: ["خبر جملة فعلية", "خبر مفرد", "خبر شبه جملة"], ans: 0 },
+                    { q: "معنى كلمة (الجواري) في نص بناة المجد:", options: ["السفن", "النساء", "الجبال"], ans: 0 },
+                    { q: "تكتب الهمزة المتوسطة على النبرة في (بِئْر) لأن ما قبلها:", options: ["مكسور", "مضموم", "ساكن"], ans: 0 }
+                ];
+            } else {
+                title = "الاختبار النهائي الشامل (ص 1 - ص 79)";
+                questions = [
+                    { q: "إعراب كلمة (أبوك) في: (حَضَرَ أَبُوكَ):", options: ["فاعل مرفوع بالواو", "فاعل مرفوع بالضمة", "مفعول به"], ans: 0 },
+                    { q: "معنى (السكينة):", options: ["الطُمأنينة والهدوء", "الخوف", "الغضب"], ans: 0 },
+                    { q: "كلمة (الذي) من أنواع المعارف وتصنف كـ:", options: ["اسم موصول", "اسم إشارة", "ضمير"], ans: 0 }
+                ];
+            }
+
+            container.innerHTML = `
+                <div class="border-b pb-4 flex justify-between items-center">
+                    <h3 class="text-2xl font-black text-brand-dark">${title}</h3>
+                    <button onclick="document.getElementById('exam-engine-container').classList.add('hidden')" class="text-xs bg-slate-200 px-3 py-1 rounded-lg">إلغاء</button>
+                </div>
+
+                <form onsubmit="submitExamEngine(event, ${examType}, ${questions.length})" class="space-y-6">
+                    ${questions.map((q, idx) => `
+                        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                            <p class="font-bold text-brand-dark text-sm">س${idx + 1}: ${q.q}</p>
+                            <div class="space-y-2">
+                                ${q.options.map((opt, oIdx) => `
+                                    <label class="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-200 cursor-pointer">
+                                        <input type="radio" name="e_q_${idx}" value="${oIdx}" required>
+                                        <span class="text-xs font-bold text-slate-700">${opt}</span>
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `).join('')}
+
+                    <button type="submit" class="w-full py-4 gold-gradient text-brand-dark font-black rounded-2xl text-lg shadow-lg">
+                        تسليم كراسة الإجابة
+                    </button>
+                </form>
+
+                <div id="exam-feedback-result" class="hidden p-6 rounded-2xl text-center border-2"></div>
+            `;
+
+            container.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function submitExamEngine(e, examType, totalCount) {
+            e.preventDefault();
+            addXP(100);
+
+            if (examType === 1) checkBadgeEarned('b5');
+            if (examType === 2) checkBadgeEarned('b6');
+
+            const fb = document.getElementById('exam-feedback-result');
+            fb.classList.remove('hidden');
+            fb.className = "p-6 rounded-2xl text-center border-2 bg-emerald-50 border-emerald-300 text-emerald-900 space-y-2";
+            fb.innerHTML = `
+                <h4 class="text-2xl font-black text-emerald-700">ممتاز جداً! حصلت على 100% 🏆</h4>
+                <p class="text-xs">تمت إضافة +100 XP إلى رصيدك وإكمال التقييم بنجاح!</p>
+            `;
+
+            confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+        }
+
+        /* ==========================================================================
+           13. USER XP, BADGES & DASHBOARD
+           ========================================================================== */
+        function addXP(amount) {
+            state.userXP += amount;
+            updateUserXP(0);
+            saveStateToStorage();
+        }
+
+        function updateUserXP(add) {
+            state.userXP += add;
+            document.getElementById('user-xp-display').innerText = `${state.userXP} XP`;
+            const dashXp = document.getElementById('dash-total-xp');
+            if (dashXp) dashXp.innerText = `${state.userXP} XP`;
+
+            // Dynamic progress bar updates
+            const lessonsCount = state.completedLessons.length;
+            const dashProgText = document.getElementById('dash-lessons-progress-text');
+            const dashProgBar = document.getElementById('dash-lessons-progress-bar');
+            if (dashProgText && dashProgBar) {
+                dashProgText.innerText = `${lessonsCount} / 8`;
+                dashProgBar.style.width = `${(lessonsCount / 8) * 100}%`;
+            }
+        }
+
+        function checkBadgeEarned(badgeId) {
+            const b = state.badges.find(item => item.id === badgeId);
+            if (b && !b.earned) {
+                b.earned = true;
+                renderDashboardBadges();
+            }
+        }
+
+        function renderDashboardBadges() {
+            const container = document.getElementById('badges-grid');
+            if (!container) return;
+            container.innerHTML = '';
+
+            state.badges.forEach(b => {
+                const div = document.createElement('div');
+                div.className = `p-4 rounded-2xl border text-center space-y-2 ${b.earned ? 'bg-white border-brand-gold shadow-md' : 'bg-slate-100 border-slate-200 opacity-50'}`;
+                div.innerHTML = `
+                    <div class="text-3xl">${b.icon}</div>
+                    <h4 class="font-bold text-xs text-brand-dark">${b.title}</h4>
+                    <p class="text-[10px] text-slate-500">${b.desc}</p>
+                    <span class="text-[9px] font-bold px-2 py-0.5 rounded-full ${b.earned ? 'bg-emerald-100 text-brand-emerald' : 'bg-slate-200 text-slate-500'}">
+                        ${b.earned ? 'مكتسب' : 'قيد الفتح'}
+                    </span>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function generateCertificate() {
+            const modal = document.getElementById('certificate-modal');
+            modal.classList.remove('hidden');
+        }
+
+        function closeCertificateModal() {
+            document.getElementById('certificate-modal').classList.add('hidden');
+        }
+
+        /* ==========================================================================
+           14. ADMIN CMS CONTROL PANEL
+           ========================================================================== */
+        function openAdminModal() {
+            document.getElementById('admin-modal').classList.remove('hidden');
+        }
+
+        function closeAdminModal() {
+            document.getElementById('admin-modal').classList.add('hidden');
+        }
+
+        function exportCurriculumJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state.curriculum, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "curriculum_faseeh_grade6.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importCurriculumJSON(event) {
+            const fileReader = new FileReader();
+            fileReader.onload = function (e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    state.curriculum = imported;
+                    saveStateToStorage();
+                    renderLessonsList(state.activeUnitId);
+                    alert('تم استيراد المنهج بنجاح!');
+                    closeAdminModal();
+                } catch(err) {
+                    alert('خطأ في صيغة ملف JSON المستورد.');
+                }
+            };
+            fileReader.readAsText(event.target.files[0]);
+        }
+
+        function resetDefaultCurriculum() {
+            if (confirm('هل أنت تأكد من إعادة ضبط المنهج الدراسي للوضع الأصلي؟')) {
+                state.curriculum = DEFAULT_CURRICULUM;
+                saveStateToStorage();
+                renderLessonsList(state.activeUnitId);
+                alert('تمت إعادة الضبط بنجاح.');
+                closeAdminModal();
+            }
+        }
+
+        function saveAdminLesson() {
+            const title = document.getElementById('admin-input-title').value;
+            const unitVal = parseInt(document.getElementById('admin-input-unit').value);
+            const text = document.getElementById('admin-input-text').value;
+
+            if (!title || !text) {
+                alert('يرجى ملء كافة الخانات.');
+                return;
+            }
+
+            const newLesson = {
+                id: 'custom_' + Date.now(),
+                title: title,
+                pages: "مخصص",
+                type: "قراءة",
+                summary: text.substring(0, 60) + "...",
+                text: text,
+                grammarNote: "درس إضافي مخصص من قبل الإدارة.",
+                vocab: [],
+                exercises: [],
+                quiz: []
+            };
+
+            const targetUnit = state.curriculum.units.find(u => u.id === unitVal);
+            if (targetUnit) {
+                targetUnit.lessons.push(newLesson);
+                saveStateToStorage();
+                renderLessonsList(unitVal);
+                alert('تمت إضافة الدرس الجديد بنجاح!');
+                closeAdminModal();
+            }
+        }
+    </script>
+</body>
+</html>
