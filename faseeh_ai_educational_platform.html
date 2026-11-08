@@ -123,6 +123,35 @@
             0%, 100% { height: 8px; }
             50% { height: 28px; }
         }
+    
+        /* Lesson video window */
+        .lesson-video-window {
+            width: 100%;
+            max-width: 960px;
+            margin: 0 auto;
+            overflow: hidden;
+            border-radius: 18px;
+            border: 2px solid rgba(212, 175, 55, 0.55);
+            background: #10251d;
+            box-shadow: 0 10px 28px rgba(16, 37, 29, 0.10);
+        }
+        .lesson-video-window video {
+            display: block;
+            width: 100%;
+            max-height: 560px;
+            aspect-ratio: 16 / 9;
+            object-fit: contain;
+            background: #07130f;
+        }
+        .lesson-video-message {
+            display: none;
+            color: #f8fafc;
+            text-align: center;
+            padding: 22px 14px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-brand-gold selection:text-brand-dark">
@@ -390,29 +419,19 @@
                 </div>
             </div>
 
-            <!-- STAGE 1: AI LESSON / AUDIO TEXT VIEW -->
+            <!-- STAGE 1: LESSON VIDEO + TEXT -->
             <div id="stage-content-1" class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-lg space-y-6">
-                <!-- Audio Narrator Controls Bar -->
-                <div class="bg-brand-sand/50 p-4 rounded-2xl border border-brand-gold/20 flex flex-wrap items-center justify-between gap-4">
-                    <div class="flex items-center gap-3">
-                        <button id="tts-play-btn" onclick="toggleAudioNarrative()" class="w-12 h-12 rounded-full gold-gradient text-brand-dark font-bold text-lg flex items-center justify-center shadow-md hover:scale-105 transition">
-                            <i id="tts-icon" class="fa-solid fa-play"></i>
-                        </button>
-                        <div>
-                            <h4 class="font-bold text-brand-dark text-sm">المستمع الذكي - قراءة النص بالصوت</h4>
-                            <p class="text-xs text-slate-500">انقر للاستماع لنص الدرس بصوت فصيح</p>
-                        </div>
-                    </div>
-                    <div id="tts-wave-container" class="hidden flex items-center gap-2">
-                        <div class="voice-wave">
-                            <div class="voice-bar"></div>
-                            <div class="voice-bar"></div>
-                            <div class="voice-bar"></div>
-                            <div class="voice-bar"></div>
-                        </div>
-                        <span class="text-xs text-brand-emerald font-bold mr-2">جاري القراءة...</span>
-                    </div>
-                </div>
+                <!-- Lesson Video Window -->
+               <div class="lesson-video-window">
+    <iframe
+        id="lesson-video"
+        src="https://www.youtube.com/embed/c3UX10mxylw"
+        title="شرح درس سمر"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen>
+    </iframe>
+</div>
 
                 <!-- Text / Poem Display Box -->
                 <div class="prose max-w-none">
@@ -1281,6 +1300,39 @@
             });
         }
 
+        // اربط كل درس بالفيديو الخاص به من مجلد public/videos
+        // عند إضافة فيديو جديد، أضف سطرًا هنا باستخدام معرّف الدرس.
+        const LESSON_VIDEOS = {
+            "u1_l1": "/videos/samar.mp4",   // الدرس الأول: سمر تطور نفسها
+            "u1_l2": "/videos/kenz.mp4"     // الدرس الثاني: كنز لا يقدر بثمن
+            // "u1_l3": "/videos/decision.mp4" // أزل // عند تجهيز فيديو اصنع قرارك
+        };
+
+        function loadLessonVideo(lessonId) {
+            const video = document.getElementById("lesson-video");
+            const source = document.getElementById("lesson-video-source");
+            const message = document.getElementById("lesson-video-message");
+            const videoPath = LESSON_VIDEOS[lessonId];
+
+            // أوقف أي فيديو سابق عند الانتقال إلى درس آخر.
+            video.pause();
+            video.removeAttribute("src");
+            source.removeAttribute("src");
+            video.load();
+
+            if (!videoPath) {
+                video.style.display = "none";
+                message.style.display = "block";
+                message.textContent = "الفيديو الخاص بهذا الدرس سيُضاف قريبًا.";
+                return;
+            }
+
+            message.style.display = "none";
+            video.style.display = "block";
+            source.src = videoPath;
+            video.load();
+        }
+
         function openLessonViewer(lessonId) {
             let foundLesson = null;
             state.curriculum.units.forEach(u => {
@@ -1291,6 +1343,7 @@
             if (!foundLesson) return;
 
             state.activeLesson = foundLesson;
+            loadLessonVideo(foundLesson.id);
             document.getElementById('viewer-lesson-title').innerText = foundLesson.title;
             document.getElementById('viewer-lesson-meta').innerText = `${foundLesson.pages} • المنهج المدرسي الرسمي`;
 
