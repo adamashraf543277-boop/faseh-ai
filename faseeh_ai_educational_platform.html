@@ -135,13 +135,22 @@
             background: #10251d;
             box-shadow: 0 10px 28px rgba(16, 37, 29, 0.10);
         }
-        .lesson-video-window video {
+        .lesson-video-window video,
+        .lesson-video-window iframe {
             display: block;
             width: 100%;
-            max-height: 560px;
+            height: auto;
             aspect-ratio: 16 / 9;
-            object-fit: contain;
+            border: 0;
             background: #07130f;
+        }
+        .lesson-video-window video {
+            max-height: 560px;
+            object-fit: contain;
+        }
+        .lesson-video-window iframe {
+            height: min(56.25vw, 540px);
+            max-height: 560px;
         }
         .lesson-video-message {
             display: none;
@@ -422,16 +431,28 @@
             <!-- STAGE 1: LESSON VIDEO + TEXT -->
             <div id="stage-content-1" class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-lg space-y-6">
                 <!-- Lesson Video Window -->
-               <div class="lesson-video-window">
-    <iframe
-        id="lesson-video"
-        src="https://www.youtube.com/embed/c3UX10mxylw"
-        title="شرح درس سمر"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        referrerpolicy="strict-origin-when-cross-origin"
-        allowfullscreen>
-    </iframe>
-</div>
+                <div class="lesson-video-window">
+                    <!-- YouTube player: shown for YouTube lesson links -->
+                    <iframe
+                        id="lesson-youtube-video"
+                        title="فيديو شرح الدرس"
+                        src="about:blank"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerpolicy="strict-origin-when-cross-origin"
+                        allowfullscreen
+                        style="display: none;">
+                    </iframe>
+
+                    <!-- MP4 player: shown for videos stored in the project -->
+                    <video id="lesson-video" controls playsinline preload="metadata" style="display: none;">
+                        <source id="lesson-video-source" src="" type="video/mp4">
+                        متصفحك لا يدعم تشغيل الفيديو.
+                    </video>
+
+                    <div id="lesson-video-message" class="lesson-video-message">
+                        الفيديو الخاص بهذا الدرس سيُضاف قريبًا.
+                    </div>
+                </div>
 
                 <!-- Text / Poem Display Box -->
                 <div class="prose max-w-none">
@@ -1300,37 +1321,90 @@
             });
         }
 
-        // اربط كل درس بالفيديو الخاص به من مجلد public/videos
-        // عند إضافة فيديو جديد، أضف سطرًا هنا باستخدام معرّف الدرس.
+        // اربط كل درس بالفيديو الخاص به.
+        // يمكن وضع رابط YouTube أو مسار ملف MP4.
         const LESSON_VIDEOS = {
-            "u1_l1": "/videos/samar.mp4",   // الدرس الأول: سمر تطور نفسها
-            "u1_l2": "/videos/kenz.mp4"     // الدرس الثاني: كنز لا يقدر بثمن
-            // "u1_l3": "/videos/decision.mp4" // أزل // عند تجهيز فيديو اصنع قرارك
+            "u1_l1": "https://www.youtube.com/watch?v=c3UX10mxylw", // الدرس الأول: سمر تطور نفسها
+            "u1_l2": "/videos/kenz.mp4" // الدرس الثاني: كنز لا يقدر بثمن
+            // "u1_l3": "https://www.youtube.com/watch?v=VIDEO_ID"
         };
 
+        function getYouTubeEmbedUrl(url) {
+            try {
+                const parsedUrl = new URL(url);
+                let videoId = "";
+
+                if (parsedUrl.hostname.includes("youtu.be")) {
+                    videoId = parsedUrl.pathname.split("/").filter(Boolean)[0] || "";
+                } else if (parsedUrl.pathname.includes("/embed/")) {
+                    videoId = parsedUrl.pathname.split("/embed/")[1].split("/")[0];
+                } else if (parsedUrl.pathname.includes("/shorts/")) {
+                    videoId = parsedUrl.pathname.split("/shorts/")[1].split("/")[0];
+                } else {
+                    videoId = parsedUrl.searchParams.get("v") || "";
+                }
+
+                if (!/^[a-zA-Z0-9_-]{11}$/.test(videoId)) return null;
+
+                return `https://www.youtube.com/embed/${videoId}`;
+            } catch (error) {
+                return null;
+            }
+        }
+
         function loadLessonVideo(lessonId) {
-            const video = document.getElementById("lesson-video");
-            const source = document.getElementById("lesson-video-source");
+            const youtubeFrame = document.getElementById("lesson-youtube-video");
+            const mp4Video = document.getElementById("lesson-video");
+            const mp4Source = document.getElementById("lesson-video-source");
             const message = document.getElementById("lesson-video-message");
             const videoPath = LESSON_VIDEOS[lessonId];
 
-            // أوقف أي فيديو سابق عند الانتقال إلى درس آخر.
-            video.pause();
-            video.removeAttribute("src");
-            source.removeAttribute("src");
-            video.load();
+            // أوقف ملف MP4 السابق وأوقف تحميل فيديو YouTube السابق.
+            if (mp4Video) {
+                mp4Video.pause();
+                mp4Video.removeAttribute("src");
+                if (mp4Source) mp4Source.removeAttribute("src");
+                mp4Video.load();
+                mp4Video.style.display = "none";
+            }
+
+            if (youtubeFrame) {
+                youtubeFrame.src = "about:blank";
+                youtubeFrame.style.display = "none";
+            }
 
             if (!videoPath) {
-                video.style.display = "none";
-                message.style.display = "block";
-                message.textContent = "الفيديو الخاص بهذا الدرس سيُضاف قريبًا.";
+                if (message) {
+                    message.style.display = "block";
+                    message.textContent = "الفيديو الخاص بهذا الدرس سيُضاف قريبًا.";
+                }
                 return;
             }
 
-            message.style.display = "none";
-            video.style.display = "block";
-            source.src = videoPath;
-            video.load();
+            const youtubeUrl = getYouTubeEmbedUrl(videoPath);
+
+            if (youtubeUrl && youtubeFrame) {
+                if (message) message.style.display = "none";
+
+                youtubeFrame.style.display = "block";
+                youtubeFrame.src = youtubeUrl;
+                return;
+            }
+
+            // إذا لم يكن الرابط من YouTube، نتعامل معه كملف MP4.
+            if (mp4Video && mp4Source) {
+                if (message) message.style.display = "none";
+
+                mp4Video.style.display = "block";
+                mp4Source.src = videoPath;
+                mp4Video.load();
+                return;
+            }
+
+            if (message) {
+                message.style.display = "block";
+                message.textContent = "تعذر تحميل الفيديو. تحقق من رابط الفيديو أو مساره.";
+            }
         }
 
         function openLessonViewer(lessonId) {
